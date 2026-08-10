@@ -14,4 +14,8 @@ describe('high quality render scale',()=>{
   it('caps very large and Retina displays to protect frame rate',()=>{
     expect(preferredRenderScale(3840,2160)).toBe(1.5);
   });
+
+  it('uses a still-sharp 1280×720 backing canvas on compact phones',()=>{
+    expect(preferredRenderScale(844,390,1280,720,true)).toBe(1);
+  });
 });

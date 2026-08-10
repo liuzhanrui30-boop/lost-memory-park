@@ -142,8 +142,11 @@ export interface AccessibilitySettings {
   showHiddenTraps: boolean;
   gamepad: boolean;
   touch: boolean;
+  touchMode: 'auto'|'on'|'off';
   touchScale: number;
+  touchJumpScale: number;
   touchOpacity: number;
+  touchInset: number;
   touchLeftHanded: boolean;
   haptics: boolean;
   colorFriendly: boolean;
@@ -157,7 +160,7 @@ export const defaultSettings = (): AccessibilitySettings => ({
   master: .8, muted: false, music: .7, sfx: .8, ambient: .45, shake: .2, flash: .65, particles: .35,
   dynamicBackground: true, reducedMotion: false, highContrast: false, thickOutlines: false,
   hudMode: 'full', textScale: 1, gameSpeed: 1, warningBoost: false,
-  showHiddenTraps: false, gamepad: true, touch: false, touchScale: 1, touchOpacity: .65,
+  showHiddenTraps: false, gamepad: true, touch: false, touchMode: 'auto', touchScale: 1, touchJumpScale: 1.12, touchOpacity: .72, touchInset: 18,
   touchLeftHanded: false, haptics: true, colorFriendly: false, dialogueSpeed: 1,
   showGhost: false, heatHud: true,
   bindings: { left:'KeyA', right:'KeyD', jump:'Space', restart:'KeyR', pause:'Escape' },

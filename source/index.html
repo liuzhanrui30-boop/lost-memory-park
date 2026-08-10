@@ -2,7 +2,10 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#17122c" />
   <meta name="description" content="原创非像素 I Wanna 式横版挑战游戏《失忆乐园》" />
   <title>失忆乐园 · 跑跳剧场版</title>
@@ -36,7 +39,7 @@
     <section id="title-screen" class="screen visible title-screen">
       <div class="title-card">
         <div class="title-emblem" aria-hidden="true"><i></i><b>ADMIT ONE</b><i></i></div>
-        <p class="eyebrow">高清流畅版 · v12.3</p>
+        <p class="eyebrow">桌面手机双端版 · v12.4</p>
         <h1>失忆乐园</h1>
         <p class="tagline">只保留移动、双跳与重开，把难度集中到助跑、上升、下坠和反向落点。每个普通关卡扩为四幕，第四幕是章节专属返场挑战。</p>
         <div class="menu">
@@ -47,7 +50,7 @@
           <button id="open-archive">记忆档案</button><button id="open-settings">设置</button>
           <button id="open-credits">制作信息</button>
         </div>
-        <p class="controls">A/D 或方向键移动　空格/Z 双跳　R 秒重开　Esc 暂停<br>v12.3：1600×900 起步、最高 1920×1080 内部画布；完整渐变与光影；固定 60Hz 手感</p>
+        <p class="controls">电脑：A/D 或方向键移动　空格/Z 双跳　R 重开<br>手机：横屏自动显示拇指按钮；大小、透明度、位置和左右布局均可调整</p>
       </div>
       <i class="halo h1"></i><i class="halo h2"></i>
     </section>
@@ -88,10 +91,13 @@
         <h3>控制</h3>
         <label><span>启用手柄</span><input id="gamepad-toggle" type="checkbox" /></label>
         <label><span>手柄震动</span><input id="haptics-toggle" type="checkbox" /></label>
-        <label><span>显示触控按钮</span><input id="touch-toggle" type="checkbox" /></label>
-        <label><span>触控大小</span><input id="touch-scale" type="range" min=".7" max="1.4" step=".1" /></label>
+        <label><span>触控按钮</span><select id="touch-mode"><option value="auto">手机自动显示</option><option value="on">始终显示</option><option value="off">始终关闭</option></select></label>
+        <label><span>方向按钮大小</span><input id="touch-scale" type="range" min=".75" max="1.4" step=".05" /></label>
+        <label><span>跳跃按钮大小</span><input id="touch-jump-scale" type="range" min=".8" max="1.5" step=".05" /></label>
         <label><span>触控透明度</span><input id="touch-opacity" type="range" min=".25" max="1" step=".05" /></label>
+        <label><span>按钮离底部</span><input id="touch-inset" type="range" min="6" max="64" step="2" /></label>
         <label><span>触控左右互换</span><input id="touch-left-handed" type="checkbox" /></label>
+        <p class="settings-note">手机推荐横屏。方向区支持手指左右滑动换向，另一只手可同时按跳跃。</p>
         <div id="binding-list" class="binding-list"></div>
         <h3>辅助</h3>
         <label><span>游戏速度</span><input id="assist-speed" type="range" min=".55" max="1" step=".05" /></label>
@@ -105,14 +111,22 @@
     <section id="chapters-screen" class="screen hidden shade"><div class="panel"><p class="eyebrow">章节选择</p><h2>已走过的舞台</h2><div id="chapter-list"></div><button id="close-chapters">返回</button></div></section>
     <section id="modes-screen" class="screen hidden shade"><div class="panel"><p class="eyebrow">通关后舞台</p><h2>换一种方式重来</h2><p class="panel-copy">Boss Rush 连战四位舞台主人；镜像模式翻转画面与方向；导演失控会为每个房间稳定抽取一种疯狂规则。均需先完成任一结局。</p><button id="start-director" class="director-mode">导演失控 · 五种指令轮换</button><button id="start-bossrush">Boss Rush</button><button id="start-mirror">镜像模式</button><button id="close-modes">返回</button></div></section>
     <section id="archive-screen" class="screen hidden shade"><div class="panel archive-panel"><p class="eyebrow">广播与记忆</p><h2>记忆档案</h2><div id="archive-list"></div><button id="close-archive">返回</button></div></section>
-    <section id="credits-screen" class="screen hidden shade"><div class="panel credits-panel"><p class="eyebrow">制作信息</p><h2>失忆乐园</h2><div class="credits-copy"><p><b>高清流畅版 · v12.3</b></p><p>原创非像素 Canvas 高难平台游戏。程序、美术、宽地图、关卡、文字与 WebAudio 全部内嵌，无外链资源。</p><p><b>高清与性能升级</b><br>内部画布不再降到低清分辨率：普通窗口至少使用 1600×900，大屏最高使用 1920×1080，并为背景、世界布景和前景缓存建立同分辨率高清缓存。完整平台渐变、尖刺折面和角色光影已经恢复；固定 60Hz 物理、视野裁剪、粒子预算和暂停页降频继续保障帧率。</p><p><b>操作</b><br>A/D 或方向键移动；空格/Z 双跳；R 返回检查点；退格清除残影；Esc 暂停。</p></div><button id="close-credits">返回</button></div></section>
+    <section id="credits-screen" class="screen hidden shade"><div class="panel credits-panel"><p class="eyebrow">制作信息</p><h2>失忆乐园</h2><div class="credits-copy"><p><b>桌面手机双端版 · v12.4</b></p><p>原创非像素 Canvas 高难平台游戏。程序、美术、宽地图、关卡、文字与 WebAudio 全部内嵌，无外链资源。</p><p><b>双端控制</b><br>电脑保持高清键盘、手柄体验；手机横屏会自动显示安全区触控按钮，支持多点触控、方向滑动换向、触觉反馈，并可调整方向键大小、跳跃键大小、透明度、底部距离和左右手布局。手机采用仍高于实际屏幕显示需求的 1280×720 内部画布以稳定帧率，桌面保持 1600×900 至 1920×1080。</p><p><b>操作</b><br>A/D 或方向键移动；空格/Z 双跳；R 返回检查点；退格清除残影；Esc 暂停。</p></div><button id="close-credits">返回</button></div></section>
     <section id="memory-flash" class="memory-flash hidden"><div><small id="memory-title"></small><p id="memory-text"></p><span>空格 / 点击跳过</span></div></section>
 
     <div id="room-card" class="room-card hidden"><small id="chapter-label">第 1 章</small><h2 id="room-title"></h2><p id="room-hint"></p></div>
     <div id="toast" class="toast hidden"></div>
     <div id="beat-flash" class="beat-flash hidden"><small>ACT CLEAR</small><strong id="beat-flash-label"></strong><span id="beat-flash-rank"></span></div>
     <div id="death-flash" class="death-flash"></div>
-    <div id="touch-controls" class="touch-controls hidden"><button class="touch-pause" data-action="pause">Ⅱ</button><div class="touch-move"><button data-action="left">◀</button><button data-action="right">▶</button></div><div class="touch-action"><button data-action="jump">跳</button></div></div>
+    <div id="touch-controls" class="touch-controls hidden" aria-label="手机触控操作">
+      <button class="touch-pause" data-action="pause" aria-label="暂停"><span>Ⅱ</span></button>
+      <div class="touch-move" role="group" aria-label="左右移动">
+        <button class="touch-left" data-action="left" aria-label="向左"><span>◀</span><small>左</small></button>
+        <button class="touch-right" data-action="right" aria-label="向右"><span>▶</span><small>右</small></button>
+      </div>
+      <div class="touch-action"><button class="touch-jump" data-action="jump" aria-label="跳跃"><span>跳</span><small>二段跳</small></button></div>
+    </div>
+    <div id="orientation-hint" class="orientation-hint" aria-hidden="true"><div><b>↻</b><strong>请将手机横过来</strong><span>横屏拥有完整视野与双拇指按钮</span></div></div>
 
     <section id="ending-screen" class="screen hidden ending-screen">
       <div class="ending-card"><p class="eyebrow">挑战完成</p><h2 id="ending-title"></h2><p id="ending-text"></p><div id="ending-stats"></div>

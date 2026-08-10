@@ -14,6 +14,7 @@ import { buildProjectilePattern,patternGlyph,patternLabel } from '../v10/project
 import { bossStageReady as isBossStageReady,bossWaveRequirement as requiredBossWaves } from '../v11/boss-stage';
 import { fixedBackdropOffset,gentleShake,smoothCamera,snapCameraX,stableCameraTarget } from '../v12/stable-camera';
 import { preferredRenderScale } from '../v12/render-quality';
+import { compactTouchViewport } from '../v12/touch-ui';
 import type { BlockDef, ButtonDef, CrusherDef, EndingId, GhostPoint, LaserDef, OptionalCollectible, Rect, RoomDef, SentryDef, SentryPattern, SpikeDef, V2Save } from './types';
 import { MAX_ECHOES, defaultSettings, newV2Save, v2Ending } from './types';
 
@@ -119,7 +120,7 @@ export class IWannaGame {
   private contractFailed=false;
   private contractCleared=false;
   private stillTime=0;
-  private dpr=preferredRenderScale(window.innerWidth,window.innerHeight);
+  private dpr=preferredRenderScale(window.innerWidth,window.innerHeight,1280,720,compactTouchViewport(window.innerWidth,window.innerHeight,this.touchCapable()));
   private lowDetail=false;
   private stageCache:HTMLCanvasElement|null=null;
   private stageCacheKey='';
@@ -786,7 +787,8 @@ export class IWannaGame {
   }
   private emitHud(force=false):void{if(!force&&this.time<this.hudNext)return;this.hudNext=this.time+1/15;const contract=this.room.contract,seals=Object.values(this.save.bestRooms).filter(record=>record.contract).length+(this.contractCleared&&!this.save.bestRooms[this.room.id]?.contract?1:0),nextLock=this.buttons.find(button=>button.id.includes('-lock-')&&!button.pressed),remaining=this.buttons.filter(button=>button.id.includes('-lock-')&&!button.pressed).length;this.callbacks.onHud({room:this.save.room+1,deaths:this.save.deaths,shards:this.save.shards.length,elapsed:this.time,progress:Math.max(0,Math.min(1,(this.player.x+PW)/this.worldWidth())),jumps:Math.max(0,2-this.player.jumps),heat:Math.round(this.heat),echoes:this.echoes.length,mode:this.save.mode,director:this.directorCommand,beats:{current:this.beatIndex,total:this.room.beats?.length??0,gold:this.beatGold},combo:{value:this.combo,tier:comboTier(this.combo),nearMiss:this.nearMissFx>0},lock:{remaining,next:nextLock?requirementLabel(nextLock.requires):'已解除'},contract:{label:contract?.label??'无悬赏',description:contract?.description??'',state:!contract?'none':this.contractCleared?'cleared':this.contractFailed?'failed':'active',seals},boss:{active:!!this.room.boss&&this.bossPhase<this.bossMax(),phase:this.bossPhase+1,max:this.bossMax(),waves:this.bossStageWaves,required:this.bossWaveRequirement()}});}
   private persist():void{this.save.elapsed=this.time;this.callbacks.onSave(this.getSave());}
-  private resize():void{const parent=this.canvas.parentElement;if(!parent)return;const ratio=Math.min(parent.clientWidth/W,parent.clientHeight/H),quality=preferredRenderScale(parent.clientWidth,parent.clientHeight);if(Math.abs(quality-this.dpr)>.01){this.dpr=quality;this.canvas.width=Math.round(W*this.dpr);this.canvas.height=Math.round(H*this.dpr);this.ctx.setTransform(this.dpr,0,0,this.dpr,0,0);this.stageCacheKey='';this.sceneryCacheKey='';this.foregroundCacheKey='';}this.canvas.style.width=`${W*ratio}px`;this.canvas.style.height=`${H*ratio}px`;}
+  private touchCapable():boolean{return navigator.maxTouchPoints>0||window.matchMedia('(pointer:coarse)').matches;}
+  private resize():void{const parent=this.canvas.parentElement;if(!parent)return;const ratio=Math.min(parent.clientWidth/W,parent.clientHeight/H),compact=compactTouchViewport(parent.clientWidth,parent.clientHeight,this.touchCapable()),quality=preferredRenderScale(parent.clientWidth,parent.clientHeight,W,H,compact);if(Math.abs(quality-this.dpr)>.01){this.dpr=quality;this.canvas.width=Math.round(W*this.dpr);this.canvas.height=Math.round(H*this.dpr);this.ctx.setTransform(this.dpr,0,0,this.dpr,0,0);this.stageCacheKey='';this.sceneryCacheKey='';this.foregroundCacheKey='';}this.canvas.style.width=`${W*ratio}px`;this.canvas.style.height=`${H*ratio}px`;}
   private roundRect(c:CanvasRenderingContext2D,x:number,y:number,w:number,h:number,r:number):void{c.beginPath();c.roundRect(x,y,w,h,Math.max(0,Math.min(r,w/2,h/2)));}
   private darken(hex:string,amount:number):string{const value=parseInt(hex.slice(1),16),r=Math.max(0,((value>>16)&255)*(1-amount)),g=Math.max(0,((value>>8)&255)*(1-amount)),b=Math.max(0,(value&255)*(1-amount));return`rgb(${r},${g},${b})`;}
 }

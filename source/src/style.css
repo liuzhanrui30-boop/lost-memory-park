@@ -73,6 +73,8 @@ button.primary { color: #f5ead5; background: #a73e4a; }
 }
 .panel input { width: 22px; height: 22px; accent-color: #a73e4a; }
 .panel input[type="range"] { width: 170px; }
+.panel select { min-width:170px; padding:8px 10px; border:2px solid #302632; border-radius:3px; color:#302632; background:#f0e6d1; font-weight:800; }
+.settings-note { margin:0; padding:10px 13px; color:#60474e; background:rgba(216,190,145,.42); border:1px dashed rgba(61,43,47,.55); font-size:12px; line-height:1.55; text-align:left; }
 .settings-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 #slot-list, #chapter-list { display: grid; gap: 9px; margin-bottom: 12px; }
 .slot-row { display: grid; grid-template-columns: 1fr auto auto; gap: 7px; align-items: center; padding: 9px; border: 2px dashed #74636a; background: #d8c9ae; text-align: left; }
@@ -88,13 +90,30 @@ button.primary { color: #f5ead5; background: #a73e4a; }
 .memory-flash small { color: #e2be65; font: 900 14px monospace; }
 .memory-flash p { font-size: 21px; line-height: 1.7; font-weight: 700; }
 .memory-flash span { font: 700 12px monospace; opacity: .6; }
-.touch-controls { position:fixed; z-index:22; left:calc(18px + env(safe-area-inset-left)); right:calc(18px + env(safe-area-inset-right)); bottom:calc(18px + env(safe-area-inset-bottom)); display:flex; align-items:end; justify-content:space-between; pointer-events:none; transform:scale(var(--touch-scale,1)); transform-origin:bottom center; }
-.touch-controls>div { display:flex; gap:10px; }
-.touch-controls button { width:68px; height:68px; padding:0; border-radius:50%; opacity:var(--touch-opacity,.65); pointer-events:auto; touch-action:none; }
-.touch-pause { position:absolute; top:-78px; right:0; width:42px !important; height:42px !important; border-radius:6px !important; }
+.touch-controls { position:fixed; z-index:22; left:calc(16px + env(safe-area-inset-left)); right:calc(16px + env(safe-area-inset-right)); bottom:calc(var(--touch-inset,18px) + env(safe-area-inset-bottom)); display:flex; align-items:end; justify-content:space-between; pointer-events:none; user-select:none; -webkit-user-select:none; }
+.touch-controls>div { display:flex; gap:calc(8px * var(--touch-scale,1)); }
+.touch-controls button { width:calc(72px * var(--touch-scale,1)); height:calc(72px * var(--touch-scale,1)); padding:0; border:2px solid rgba(255,240,210,.78); border-radius:24px; color:#fff1d2; background:linear-gradient(145deg,rgba(92,51,68,.9),rgba(39,25,38,.88)); box-shadow:0 5px 0 rgba(18,10,18,.72),0 0 0 3px rgba(35,22,34,.38); opacity:var(--touch-opacity,.72); pointer-events:auto; touch-action:none; -webkit-tap-highlight-color:transparent; }
+.touch-controls button::after { left:12px; right:12px; top:7px; background:rgba(255,255,255,.22); }
+.touch-controls button span { display:block; font:900 calc(25px * var(--touch-scale,1))/1 monospace; pointer-events:none; }
+.touch-controls button small { display:block; margin-top:5px; font:800 calc(9px * var(--touch-scale,1))/1 sans-serif; letter-spacing:.08em; opacity:.72; pointer-events:none; }
+.touch-controls button.is-pressed { transform:translateY(5px) scale(.96); box-shadow:0 1px 0 rgba(18,10,18,.75),0 0 18px rgba(241,190,83,.38); filter:brightness(1.22); }
+.touch-move { padding:calc(7px * var(--touch-scale,1)); border:1px solid rgba(255,232,193,.22); border-radius:calc(30px * var(--touch-scale,1)); background:rgba(28,18,28,.3); }
+.touch-left { border-radius:50% 26% 26% 50% !important; }
+.touch-right { border-radius:26% 50% 50% 26% !important; }
+.touch-jump { width:calc(90px * var(--touch-scale,1) * var(--touch-jump-scale,1.12)) !important; height:calc(90px * var(--touch-scale,1) * var(--touch-jump-scale,1.12)) !important; border-radius:50% !important; color:#302632 !important; background:linear-gradient(145deg,rgba(255,218,119,.95),rgba(196,86,93,.94)) !important; }
+.touch-jump span { font-family:"PingFang SC",sans-serif !important; font-size:calc(25px * var(--touch-scale,1) * var(--touch-jump-scale,1.12)) !important; }
+.touch-pause { position:absolute; top:calc(-54px * var(--touch-scale,1)); right:4px; width:calc(42px * var(--touch-scale,1)) !important; height:calc(42px * var(--touch-scale,1)) !important; border-radius:50% !important; }
+.touch-pause span { font-size:calc(15px * var(--touch-scale,1)) !important; }
 .touch-controls.left-handed .touch-move { order:2; }
 .touch-controls.left-handed .touch-action { order:1; }
 .touch-controls.left-handed .touch-pause { right:auto; left:0; }
+.orientation-hint { display:none; position:fixed; inset:0; z-index:80; align-items:center; justify-content:center; padding:calc(22px + env(safe-area-inset-top)) calc(22px + env(safe-area-inset-right)) calc(22px + env(safe-area-inset-bottom)) calc(22px + env(safe-area-inset-left)); color:#f7ead0; background:linear-gradient(145deg,#211621,#5d3145); text-align:center; }
+.orientation-hint>div { display:grid; gap:10px; max-width:310px; }
+.orientation-hint b { font:900 58px/1 monospace; color:#efc565; }
+.orientation-hint strong { font-size:24px; }
+.orientation-hint span { font-size:13px; opacity:.72; }
+.touch-active #game-root { touch-action:none; }
+.touch-capable body { overscroll-behavior:none; }
 .mirror-canvas { transform:scaleX(-1); }
 .hud-compact .chip span, .hud-compact .chip:nth-of-type(2), .hud-compact .chip:nth-of-type(3) { display:none; }
 .director-mode { color:#f5ead5; background:#6f4d84; }
@@ -171,6 +190,50 @@ button.primary { color: #f5ead5; background: #a73e4a; }
   .director-chip { max-width:125px; }
   .heat-chip { min-width:95px; }
   .map-chip { width:70px; }
+}
+
+@media (orientation:portrait) and (max-width:900px) {
+  .touch-capable.touch-enabled .orientation-hint { display:flex; }
+}
+
+@media (orientation:landscape) and (max-height:600px) {
+  .touch-capable .screen { padding:8px calc(8px + env(safe-area-inset-right)) 8px calc(8px + env(safe-area-inset-left)); }
+  .touch-capable .title-screen { overflow:auto; align-items:flex-start; }
+  .touch-capable .title-card { width:min(820px,96vw); margin:auto; padding:12px 20px 10px; box-shadow:0 0 0 4px rgba(232,203,153,.25),8px 9px 0 #603747; }
+  .touch-capable .title-emblem { display:none; }
+  .touch-capable h1 { margin:1px 0 4px; font-size:42px; }
+  .touch-capable .title-card .tagline { display:none; }
+  .touch-capable .title-card .eyebrow { font-size:10px; }
+  .touch-capable .menu { width:min(720px,100%); margin:8px auto 6px; grid-template-columns:repeat(3,1fr); gap:6px; }
+  .touch-capable .menu button:nth-child(n) { grid-column:auto; min-height:37px; padding:6px 8px; font-size:12px; box-shadow:2px 3px 0 #302632; }
+  .touch-capable .menu button:nth-child(1),.touch-capable .menu button:nth-child(2) { grid-column:auto; }
+  .touch-capable .controls { font-size:9px; line-height:1.35; }
+  .touch-capable .panel,.touch-capable .ending-card { width:min(640px,96vw); max-height:94vh; padding:15px 20px; overflow:auto; }
+  .touch-capable .panel h2,.touch-capable .ending-card h2 { margin:3px 0 10px; font-size:25px; }
+  .touch-capable .panel button,.touch-capable .ending-card button { padding:8px 12px; }
+  .touch-capable .settings-panel { width:min(760px,96vw); }
+  .touch-capable .settings-scroll { max-height:62vh; grid-template-columns:1fr 1fr; gap:5px; }
+  .touch-capable .settings-scroll h3,.touch-capable .settings-note { grid-column:1/-1; }
+  .touch-capable .panel label { min-height:42px; padding:7px 10px; font-size:12px; }
+  .touch-capable .panel input[type="range"],.touch-capable .panel select { width:130px; min-width:130px; }
+  .touch-capable #hud { left:calc(5px + env(safe-area-inset-left)); right:calc(5px + env(safe-area-inset-right)); top:calc(5px + env(safe-area-inset-top)); gap:3px; }
+  .touch-capable #hud .hud-cluster { padding:2px; }
+  .touch-capable #hud .chip { min-height:27px; padding:4px 6px; }
+  .touch-capable #hud .chip span { display:none; }
+  .touch-capable #hud .chip b { font-size:10px; }
+  .touch-capable #hud .map-chip { width:68px; }
+  .touch-capable #hud .echo-chip,.touch-capable #hud .hud-stats>.chip:nth-child(2),.touch-capable #hud .hud-stats>.chip:nth-child(3),.touch-capable #hud .take-chip { display:none; }
+  .touch-capable #hud .time { min-width:70px; }
+  .touch-capable #hud .hud-secondary { display:none; }
+  .touch-capable .room-card { left:calc(8px + env(safe-area-inset-left)); top:46px; width:min(300px,54vw); padding:9px 12px; }
+  .touch-capable .room-card h2 { margin:3px 0; font-size:18px; }
+  .touch-capable .room-card p { margin:3px 0; font-size:10px; }
+  .touch-capable .touch-controls { left:calc(9px + env(safe-area-inset-left)); right:calc(9px + env(safe-area-inset-right)); }
+}
+
+@media (orientation:landscape) and (max-height:430px) {
+  .touch-capable .title-card { padding-top:8px; }
+  .touch-capable .menu { margin-top:5px; }
 }
 
 /* ── v7 high-pressure performance layer ── */
