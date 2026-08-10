@@ -1,0 +1,21 @@
+{
+  "name": "lost-memory-park",
+  "version": "12.3.0",
+  "description": "《失忆乐园》原创非像素纯跑跳、四幕宽关卡与完整 Boss 阶段网页游戏",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build && node scripts/make-standalone.mjs",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "release:pages": "npm run build && node scripts/sync-pages.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0",
+    "vitest": "^3.0.7"
+  }
+}

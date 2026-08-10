@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#17122c" />
+  <meta name="description" content="原创非像素 I Wanna 式横版挑战游戏《失忆乐园》" />
+  <title>失忆乐园 · 跑跳剧场版</title>
+</head>
+<body>
+  <div id="app">
+    <main id="game-root"></main>
+    <div id="hud" class="hidden">
+      <div class="hud-cluster hud-route">
+        <div class="chip room-chip"><span>房间</span><b id="room-number">01 / 30</b></div>
+        <div class="chip map-chip"><span>舞台进度</span><i><em id="map-progress"></em></i></div>
+        <div class="chip take-chip"><span>四幕演出</span><b id="beat-stamps">○○○○</b></div>
+      </div>
+      <div class="hud-cluster hud-abilities">
+        <div class="chip ability-chip"><span>双跳</span><b id="jumps">●●</b></div>
+      </div>
+      <div class="hud-cluster hud-stats">
+        <div class="chip echo-chip"><span>残影</span><b id="echoes">0 / 6</b></div>
+        <div class="chip"><span>票根</span><b id="shards">0 / 12</b></div>
+        <div class="chip"><span>死亡</span><b id="deaths">0</b></div>
+        <div class="chip time"><span>时间</span><b id="timer">00:00.0</b></div>
+      </div>
+      <div class="hud-secondary">
+        <div id="director-command" class="chip director-chip">导演：标准演出</div>
+        <div id="contract-chip" class="chip contract-chip"><span>导演悬赏</span><b id="contract-state">待命</b><small id="contract-seals">0 / 24</small></div>
+        <div id="combo-chip" class="chip combo-chip"><span>险过连拍</span><b id="combo-value">×0</b></div>
+        <div class="chip heat-chip"><span>舞台热度</span><b id="heat-value">0</b><i><em id="heat-bar"></em></i></div>
+      </div>
+    </div>
+
+    <section id="title-screen" class="screen visible title-screen">
+      <div class="title-card">
+        <div class="title-emblem" aria-hidden="true"><i></i><b>ADMIT ONE</b><i></i></div>
+        <p class="eyebrow">高清流畅版 · v12.3</p>
+        <h1>失忆乐园</h1>
+        <p class="tagline">只保留移动、双跳与重开，把难度集中到助跑、上升、下坠和反向落点。每个普通关卡扩为四幕，第四幕是章节专属返场挑战。</p>
+        <div class="menu">
+          <button id="new-game" class="primary">开始挑战</button>
+          <button id="continue-game">暂无存档</button>
+          <button id="open-slots">存档槽</button><button id="open-chapters">章节选择</button>
+          <button id="start-speedrun">计时挑战</button><button id="open-modes">通关模式</button>
+          <button id="open-archive">记忆档案</button><button id="open-settings">设置</button>
+          <button id="open-credits">制作信息</button>
+        </div>
+        <p class="controls">A/D 或方向键移动　空格/Z 双跳　R 秒重开　Esc 暂停<br>v12.3：1600×900 起步、最高 1920×1080 内部画布；完整渐变与光影；固定 60Hz 手感</p>
+      </div>
+      <i class="halo h1"></i><i class="halo h2"></i>
+    </section>
+
+    <section id="pause-screen" class="screen hidden shade">
+      <div class="panel"><p class="eyebrow">挑战暂停</p><h2>喘口气</h2>
+        <button id="resume-game" class="primary">继续挑战</button>
+        <p id="pause-objective" class="pause-objective">目标：穿过完整舞台抵达后台门。Boss 每阶段必须先躲过规定攻势，再依次关闭机关。</p>
+        <div class="director-note"><b id="director-title">导演指令 · 标准演出</b><span id="director-copy">本房间使用原始舞台规则。</span></div>
+        <button id="restart-room">返回检查点 / 重开房间</button>
+        <button id="pause-settings">完整设置</button>
+        <button id="back-title">返回标题</button>
+      </div>
+    </section>
+
+    <section id="settings-screen" class="screen hidden shade">
+      <div class="panel settings-panel"><p class="eyebrow">设置</p><h2>调整梦境</h2><div class="settings-scroll">
+        <h3>声音</h3>
+        <label><span>总音量</span><input id="master-volume" type="range" min="0" max="1" step=".05" /></label>
+        <label><span>全部静音</span><input id="mute-toggle" type="checkbox" /></label>
+        <label><span>音乐</span><input id="music-volume" type="range" min="0" max="1" step=".05" /></label>
+        <label><span>音效</span><input id="sfx-volume" type="range" min="0" max="1" step=".05" /></label>
+        <label><span>环境音</span><input id="ambient-volume" type="range" min="0" max="1" step=".05" /></label>
+        <h3>画面与文字</h3>
+        <label><span>轻微屏幕震动</span><input id="shake-strength" type="range" min="0" max="1" step=".1" /></label>
+        <label><span>闪光强度</span><input id="flash-strength" type="range" min="0" max="1" step=".1" /></label>
+        <label><span>粒子数量</span><input id="particle-count" type="range" min="0" max="1.5" step=".25" /></label>
+        <label><span>动态背景</span><input id="dynamic-background" type="checkbox" /></label>
+        <label><span>显示最佳路线残影</span><input id="show-ghost" type="checkbox" /></label>
+        <label><span>显示舞台热度</span><input id="heat-hud" type="checkbox" /></label>
+        <label><span>减少动态效果</span><input id="reduced-motion" type="checkbox" /></label>
+        <label><span>高对比危险物</span><input id="high-contrast" type="checkbox" /></label>
+        <label><span>色觉友好标记</span><input id="color-friendly" type="checkbox" /></label>
+        <label><span>加粗轮廓</span><input id="thick-outlines" type="checkbox" /></label>
+        <label><span>HUD</span><select id="hud-mode"><option value="full">完整</option><option value="compact">精简</option><option value="hidden">隐藏</option></select></label>
+        <label><span>文字大小</span><input id="text-scale" type="range" min=".8" max="1.3" step=".1" /></label>
+        <label><span>对话速度</span><input id="dialogue-speed" type="range" min=".6" max="1.8" step=".2" /></label>
+        <h3>控制</h3>
+        <label><span>启用手柄</span><input id="gamepad-toggle" type="checkbox" /></label>
+        <label><span>手柄震动</span><input id="haptics-toggle" type="checkbox" /></label>
+        <label><span>显示触控按钮</span><input id="touch-toggle" type="checkbox" /></label>
+        <label><span>触控大小</span><input id="touch-scale" type="range" min=".7" max="1.4" step=".1" /></label>
+        <label><span>触控透明度</span><input id="touch-opacity" type="range" min=".25" max="1" step=".05" /></label>
+        <label><span>触控左右互换</span><input id="touch-left-handed" type="checkbox" /></label>
+        <div id="binding-list" class="binding-list"></div>
+        <h3>辅助</h3>
+        <label><span>游戏速度</span><input id="assist-speed" type="range" min=".55" max="1" step=".05" /></label>
+        <label><span>延长危险预警</span><input id="warning-boost" type="checkbox" /></label>
+        <label><span>显示隐藏陷阱</span><input id="show-traps" type="checkbox" /></label>
+        </div><div class="settings-actions"><button id="close-settings" class="primary">完成</button><button id="reset-settings">恢复默认</button></div>
+      </div>
+    </section>
+
+    <section id="slots-screen" class="screen hidden shade"><div class="panel"><p class="eyebrow">三个存档槽</p><h2>选择一场梦</h2><div id="slot-list"></div><div class="settings-actions"><button id="export-save">导出</button><button id="import-save">导入</button><input id="import-file" class="hidden" type="file" accept="application/json" /></div><button id="close-slots">返回</button></div></section>
+    <section id="chapters-screen" class="screen hidden shade"><div class="panel"><p class="eyebrow">章节选择</p><h2>已走过的舞台</h2><div id="chapter-list"></div><button id="close-chapters">返回</button></div></section>
+    <section id="modes-screen" class="screen hidden shade"><div class="panel"><p class="eyebrow">通关后舞台</p><h2>换一种方式重来</h2><p class="panel-copy">Boss Rush 连战四位舞台主人；镜像模式翻转画面与方向；导演失控会为每个房间稳定抽取一种疯狂规则。均需先完成任一结局。</p><button id="start-director" class="director-mode">导演失控 · 五种指令轮换</button><button id="start-bossrush">Boss Rush</button><button id="start-mirror">镜像模式</button><button id="close-modes">返回</button></div></section>
+    <section id="archive-screen" class="screen hidden shade"><div class="panel archive-panel"><p class="eyebrow">广播与记忆</p><h2>记忆档案</h2><div id="archive-list"></div><button id="close-archive">返回</button></div></section>
+    <section id="credits-screen" class="screen hidden shade"><div class="panel credits-panel"><p class="eyebrow">制作信息</p><h2>失忆乐园</h2><div class="credits-copy"><p><b>高清流畅版 · v12.3</b></p><p>原创非像素 Canvas 高难平台游戏。程序、美术、宽地图、关卡、文字与 WebAudio 全部内嵌，无外链资源。</p><p><b>高清与性能升级</b><br>内部画布不再降到低清分辨率：普通窗口至少使用 1600×900，大屏最高使用 1920×1080，并为背景、世界布景和前景缓存建立同分辨率高清缓存。完整平台渐变、尖刺折面和角色光影已经恢复；固定 60Hz 物理、视野裁剪、粒子预算和暂停页降频继续保障帧率。</p><p><b>操作</b><br>A/D 或方向键移动；空格/Z 双跳；R 返回检查点；退格清除残影；Esc 暂停。</p></div><button id="close-credits">返回</button></div></section>
+    <section id="memory-flash" class="memory-flash hidden"><div><small id="memory-title"></small><p id="memory-text"></p><span>空格 / 点击跳过</span></div></section>
+
+    <div id="room-card" class="room-card hidden"><small id="chapter-label">第 1 章</small><h2 id="room-title"></h2><p id="room-hint"></p></div>
+    <div id="toast" class="toast hidden"></div>
+    <div id="beat-flash" class="beat-flash hidden"><small>ACT CLEAR</small><strong id="beat-flash-label"></strong><span id="beat-flash-rank"></span></div>
+    <div id="death-flash" class="death-flash"></div>
+    <div id="touch-controls" class="touch-controls hidden"><button class="touch-pause" data-action="pause">Ⅱ</button><div class="touch-move"><button data-action="left">◀</button><button data-action="right">▶</button></div><div class="touch-action"><button data-action="jump">跳</button></div></div>
+
+    <section id="ending-screen" class="screen hidden ending-screen">
+      <div class="ending-card"><p class="eyebrow">挑战完成</p><h2 id="ending-title"></h2><p id="ending-text"></p><div id="ending-stats"></div>
+        <button id="replay" class="primary">重新挑战</button><button id="ending-title-button">返回标题</button>
+      </div>
+    </section>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
