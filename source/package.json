@@ -1,7 +1,7 @@
 {
   "name": "lost-memory-park",
-  "version": "12.4.0",
-  "description": "《失忆乐园》原创非像素纯跑跳、桌面手机双端触控与完整 Boss 阶段网页游戏",
+  "version": "12.5.0",
+  "description": "《失忆乐园》原创非像素纯跑跳、友好引导、可管理死亡残影与桌面手机双端网页游戏",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build && node scripts/make-standalone.mjs",

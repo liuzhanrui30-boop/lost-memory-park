@@ -15,7 +15,8 @@ import { bossStageReady as isBossStageReady,bossWaveRequirement as requiredBossW
 import { fixedBackdropOffset,gentleShake,smoothCamera,snapCameraX,stableCameraTarget } from '../v12/stable-camera';
 import { preferredRenderScale } from '../v12/render-quality';
 import { compactTouchViewport } from '../v12/touch-ui';
-import type { BlockDef, ButtonDef, CrusherDef, EndingId, GhostPoint, LaserDef, OptionalCollectible, Rect, RoomDef, SentryDef, SentryPattern, SpikeDef, V2Save } from './types';
+import { echoIndexAtPoint,echoesOutsideRespawnZone,type EchoBody } from '../v13/echo-management';
+import type { BlockDef, ButtonDef, CrusherDef, EndingId, GhostPoint, LaserDef, OptionalCollectible, Rect, RoomDef, SentryDef, SentryPattern, SpikeDef, TutorialSignDef, V2Save } from './types';
 import { MAX_ECHOES, defaultSettings, newV2Save, v2Ending } from './types';
 
 type BlockRun = BlockDef & { baseX:number;baseY:number;active:boolean;touched:number;lastX:number;lastY:number;crumbleTouched:number|null };
@@ -41,7 +42,7 @@ export interface V2Callbacks {
   onContract?:(result:{label:string;success:boolean;seals:number})=>void;
 }
 
-type InputAction='left'|'right'|'jump'|'restart';
+type InputAction='left'|'right'|'jump'|'drop'|'restart';
 
 const W=1280,H=720,PW=30,PH=42,STEP=1/60;
 
@@ -56,7 +57,7 @@ export class IWannaGame {
   private spikes:SpikeRun[]=[];
   private buttons:ButtonRun[]=[];
   private lasers:LaserDef[]=[];
-  private echoes:{x:number;y:number;w:number;h:number;tilt:number}[]=[];
+  private echoes:EchoBody[]=[];
   private optionals:OptionalCollectible[]=[];
   private directorCommand:DirectorCommand=neutralDirectorCommand();
   private ghostPoints:GhostPoint[]=[];
@@ -68,6 +69,7 @@ export class IWannaGame {
   private cameraX=0;
   private cameraY=0;
   private trauma=0;
+  private dropTimer=0;
   private bossPhase=0;
   private bossTimer=0;
   private bossVolleyCounter=0;
@@ -176,11 +178,19 @@ export class IWannaGame {
       this.keys[world<0?'left':'right']=true;this.lastHorizontal=world;return;
     }
     if(action==='jump'){if(!this.keys.jump)this.jumpBuffer=.12;this.keys.jump=true;return;}
+    if(action==='drop'){
+      const standing=this.blocks.find(block=>block.id===this.player.standing);if(this.player.grounded&&standing?.kind==='oneway'){this.dropTimer=.22;this.player.grounded=false;this.player.standing='';this.player.y+=6;this.player.vy=Math.max(90,this.player.vy);this.coyote=0;this.callbacks.onToast('向下穿过薄板');}return;
+    }
     if(action==='restart'&&this.started&&!this.paused)this.die('主动重开',false);
   }
   actionUp(action:InputAction):void{
     if(action==='left'||action==='right'){const physical=action==='left'?-1:1,world=this.save.mode==='mirror'?-physical:physical;this.keys[world<0?'left':'right']=false;return;}
     if(action==='jump'){this.keys.jump=false;if(this.player.vy<-180)this.player.vy*=.52;}
+  }
+  removeEchoAtScreen(clientX:number,clientY:number):boolean{
+    if(!this.started||this.paused||!this.echoes.length)return false;const rect=this.canvas.getBoundingClientRect();if(clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom)return false;
+    const worldX=(clientX-rect.left)*W/rect.width+this.cameraX,worldY=(clientY-rect.top)*H/rect.height+this.cameraY,index=echoIndexAtPoint(this.echoes,worldX,worldY);if(index<0)return false;
+    this.echoes.splice(index,1);this.callbacks.onToast('已移除这一具死亡残影');this.emitHud(true);return true;
   }
   private bossMax():number{return this.room?.boss?.stages??3;}
   private bossWaveRequirement():number{return this.room?.boss?requiredBossWaves(this.bossPhase):0;}
@@ -193,13 +203,14 @@ export class IWannaGame {
   debugChooseEnding(side:'left'|'right'):void{if(!this.debug||this.room.kind!=='epilogue')return;this.player.x=side==='left'?0:this.room.exit.x+2;this.player.y=this.room.exit.y+4;this.player.vx=this.player.vy=0;this.paused=false;}
   debugSetOverlay(visible:boolean):void{if(this.debug)this.debugOverlay=visible;}
   debugTeleport(x:number,y:number):void{if(!this.debug)return;this.player.x=Math.max(0,Math.min(this.worldWidth()-PW,x));this.player.y=Math.max(0,Math.min((this.room.worldHeight??H)-PH,y));this.player.vx=this.player.vy=0;this.updateCamera(.3);}
-  debugSnapshot(){return{room:this.save.room,id:this.room?.id??'',worldWidth:this.worldWidth(),remix:this.room?.remixKind??'',landmark:this.room?.landmark??'',devices:{launchers:this.room?.launchers?.length??0,portals:this.room?.portals?.length??0,crushers:this.room?.crushers?.length??0,spotlights:this.room?.spotlights?.length??0,sentries:this.room?.sentries?.length??0,pursuit:!!this.room?.pursuit},toggles:Object.fromEntries(this.toggleStates),beats:{current:this.beatIndex,total:this.room?.beats?.length??0,gold:this.beatGold},combo:{value:this.combo,max:this.maxCombo,timer:this.comboTimer},contract:{id:this.room?.contract?.id??'',failed:this.contractFailed,cleared:this.contractCleared},pressure:{pursuitX:this.pursuitX,pursuitActive:this.pursuitActive,shots:this.sentryShots.length},ranged:{theme:this.room?.attackTheme??'',patterns:(this.room?.sentries??[]).map(sentry=>sentry.pattern??'aimed')},render:{dpr:this.dpr,lowDetail:this.lowDetail,particles:this.particles.length,drawMs:this.perfDrawFrames?this.perfDrawMs/this.perfDrawFrames:0,updateMs:this.perfUpdates?this.perfUpdateMs/this.perfUpdates:0,drawFrames:this.perfDrawFrames,updates:this.perfUpdates},execution:{locks:this.blocks.filter(block=>block.id.includes('-lock-')&&block.kind==='gate'&&block.active).map(block=>({id:block.id,x:block.x})),switches:this.buttons.filter(button=>button.id.includes('-lock-')).map(button=>({id:button.id,x:button.x,y:button.y,pressed:button.pressed,requires:button.requires??'touch'}))},boss:{phase:this.bossPhase,max:this.bossMax(),waves:this.bossStageWaves,required:this.bossWaveRequirement(),ready:this.bossStageReady()},mode:this.save.mode,deaths:this.save.deaths,x:this.player.x,y:this.player.y,vx:this.player.vx,vy:this.player.vy,cameraX:this.cameraX,heat:this.heat,director:this.directorCommand.id,paused:this.paused};}
+  debugAddEcho(x:number,y:number):void{if(!this.debug)return;this.echoes.push({x,y,w:38,h:15,tilt:0});this.emitHud(true);}
+  debugSnapshot(){return{room:this.save.room,id:this.room?.id??'',worldWidth:this.worldWidth(),remix:this.room?.remixKind??'',landmark:this.room?.landmark??'',devices:{launchers:this.room?.launchers?.length??0,portals:this.room?.portals?.length??0,crushers:this.room?.crushers?.length??0,spotlights:this.room?.spotlights?.length??0,sentries:this.room?.sentries?.length??0,pursuit:!!this.room?.pursuit},tutorialSigns:this.room?.tutorialSigns?.length??0,toggles:Object.fromEntries(this.toggleStates),beats:{current:this.beatIndex,total:this.room?.beats?.length??0,gold:this.beatGold},combo:{value:this.combo,max:this.maxCombo,timer:this.comboTimer},contract:{id:this.room?.contract?.id??'',failed:this.contractFailed,cleared:this.contractCleared},pressure:{pursuitX:this.pursuitX,pursuitActive:this.pursuitActive,shots:this.sentryShots.length},ranged:{theme:this.room?.attackTheme??'',patterns:(this.room?.sentries??[]).map(sentry=>sentry.pattern??'aimed')},render:{dpr:this.dpr,lowDetail:this.lowDetail,particles:this.particles.length,drawMs:this.perfDrawFrames?this.perfDrawMs/this.perfDrawFrames:0,updateMs:this.perfUpdates?this.perfUpdateMs/this.perfUpdates:0,drawFrames:this.perfDrawFrames,updates:this.perfUpdates},execution:{locks:this.blocks.filter(block=>block.id.includes('-lock-')&&block.kind==='gate'&&block.active).map(block=>({id:block.id,x:block.x})),switches:this.buttons.filter(button=>button.id.includes('-lock-')).map(button=>({id:button.id,x:button.x,y:button.y,pressed:button.pressed,requires:button.requires??'touch'}))},checkpoint:{index:this.checkpointIndex,x:this.save.respawnX,y:this.save.respawnY},echoes:this.echoes.map(echo=>({...echo})),movement:{grounded:this.player.grounded,standing:this.player.standing,dropTimer:this.dropTimer},boss:{phase:this.bossPhase,max:this.bossMax(),waves:this.bossStageWaves,required:this.bossWaveRequirement(),ready:this.bossStageReady()},mode:this.save.mode,deaths:this.save.deaths,x:this.player.x,y:this.player.y,vx:this.player.vx,vy:this.player.vy,cameraX:this.cameraX,heat:this.heat,director:this.directorCommand.id,paused:this.paused};}
 
   private loadRoom(index:number,fromSave:boolean):void{
     this.room=rooms[index];this.save.room=index;this.directorCommand=this.commandForRoom();this.save.directorCommandHistory[this.room.id]=this.directorCommand.id;this.audio.setChapter(Math.max(0,this.room.chapter-1),this.room.kind==='boss');
     this.stageCacheKey='';this.sceneryCacheKey='';this.foregroundCacheKey='';this.perfDrawMs=0;this.perfDrawFrames=0;this.perfUpdateMs=0;this.perfUpdates=0;
     if(fromSave&&this.save.respawnRoom===index){this.player.x=this.save.respawnX;this.player.y=this.save.respawnY;}else{this.player.x=this.room.spawn.x;this.player.y=this.room.spawn.y;}
-    this.player.vx=this.player.vy=0;this.player.jumps=0;this.player.grounded=false;this.player.scaleX=this.player.scaleY=1;this.dead=false;this.collected=this.room.shard?this.save.shards.includes(this.room.shard.id):true;
+    this.player.vx=this.player.vy=0;this.player.jumps=0;this.player.grounded=false;this.player.scaleX=this.player.scaleY=1;this.dropTimer=0;this.dead=false;this.collected=this.room.shard?this.save.shards.includes(this.room.shard.id):true;
     this.checkpointIndex=this.save.respawnRoom===index?this.allCheckpoints().findIndex(cp=>Math.abs((cp.x-4)-this.save.respawnX)<8):-1;this.checkpointActive=this.checkpointIndex>=0;
     this.echoes=[];this.optionals=(this.room.optional??[]).filter(item=>!this.save.notes.includes(item.id));this.bossPhase=this.room.boss?(this.save.bossStages[this.room.boss.id]??0):0;this.bossTimer=0;this.bossVolleyCounter=0;this.bossStageWaves=0;this.bossShots=[];this.history=[];this.ghostSamples=[];this.ghostPoints=this.save.settings.showGhost?(this.save.ghostRooms[this.room.id]??[]):[];this.heat=0;this.maxHeat=0;this.ghostSampleClock=0;this.ghostStartTime=this.time;this.launcherCooldown.clear();this.spotlightWarnCycle.clear();this.crusherImpactCycle.clear();this.beatIndex=(this.room.beats??[]).filter(beat=>beat.x<=this.player.x).length;this.beatGold=0;this.beatFx=0;this.combo=0;this.maxCombo=0;this.comboTimer=0;this.nearMissFx=0;this.nearMissCooldown.clear();this.buttonHintAt.clear();this.hudNext=0;this.contractFailed=false;this.contractCleared=!!this.save.bestRooms[this.room.id]?.contract;this.stillTime=0;this.resetPressureSystems();this.cameraX=snapCameraX(this.player.x+PW/2,this.worldWidth(),W);this.cameraY=0;this.roomStartTime=this.time;this.roomStartDeaths=this.save.deaths;this.resetRoomObjects();this.roomIntro=2.2;this.paused=false;this.audio.setSuspended(false);this.callbacks.onRoom(this.room);this.callbacks.onDirector?.(this.directorCommand);if(this.room.message)this.callbacks.onToast(this.room.message);this.emitHud(true);this.persist();
   }
@@ -227,7 +238,7 @@ export class IWannaGame {
   }
 
   private update(dt:number):void{
-    this.time+=dt;this.roomIntro=Math.max(0,this.roomIntro-dt);this.jumpBuffer=Math.max(0,this.jumpBuffer-dt);this.beatFx=Math.max(0,this.beatFx-dt);this.nearMissFx=Math.max(0,this.nearMissFx-dt);this.comboTimer=Math.max(0,this.comboTimer-dt);if(this.comboTimer<=0)this.combo=0;this.trauma=Math.max(0,this.trauma-dt*2.8);
+    this.time+=dt;this.roomIntro=Math.max(0,this.roomIntro-dt);this.jumpBuffer=Math.max(0,this.jumpBuffer-dt);this.dropTimer=Math.max(0,this.dropTimer-dt);this.beatFx=Math.max(0,this.beatFx-dt);this.nearMissFx=Math.max(0,this.nearMissFx-dt);this.comboTimer=Math.max(0,this.comboTimer-dt);if(this.comboTimer<=0)this.combo=0;this.trauma=Math.max(0,this.trauma-dt*2.8);
     let particleWrite=0;for(const p of this.particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=900*dt;p.life-=dt;if(p.life>0)this.particles[particleWrite++]=p;}this.particles.length=particleWrite;if(this.particles.length>70)this.particles.splice(0,this.particles.length-70);
     if(this.dead){this.deathTimer-=dt;if(this.deathTimer<=0)this.respawn();this.emitHud();return;}
 
@@ -365,7 +376,7 @@ export class IWannaGame {
     for(const step of splitMotion(amount,3)){
       const oldTop=this.player.y,oldBottom=this.player.y+PH;this.player.y+=step;const body=this.playerRect();
       if(step>=0){
-        const blockHits=this.blocks.filter(b=>b.active&&this.horizontalOverlap(body,b,3)&&oldBottom<=b.y+4&&body.y+body.h>=b.y);
+        const blockHits=this.blocks.filter(b=>b.active&&!(this.dropTimer>0&&b.kind==='oneway')&&this.horizontalOverlap(body,b,3)&&oldBottom<=b.y+4&&body.y+body.h>=b.y);
         const echoHits=this.echoes.map((e,i)=>({...e,index:i})).filter(e=>this.horizontalOverlap(body,e,3)&&oldBottom<=e.y+4&&body.y+body.h>=e.y);
         const top=Math.min(...blockHits.map(b=>b.y),...echoHits.map(e=>e.y));if(Number.isFinite(top)){
           this.player.y=top-PH;const block=blockHits.find(b=>b.y===top),echo=echoHits.find(e=>e.y===top);this.player.vy=0;this.player.grounded=true;this.player.jumps=0;this.player.standing=block?.id??`echo-${echo?.index??0}`;
@@ -377,7 +388,7 @@ export class IWannaGame {
         if(hits.length){const correction=findCornerCorrection(body,hits,6);if(correction){this.player.x+=correction;continue;}this.player.y=Math.max(...hits.map(b=>b.y+b.h));this.player.vy=0;return;}
       }
     }
-    const support=shouldProbeSupport(amount,wasGrounded)?findSupport(this.playerRect(),[...this.blocks.filter(b=>b.active),...this.echoes],2.5):null;if(support){const blockSupport=this.blocks.find(b=>b===support);this.player.y=support.y-PH;this.player.grounded=true;this.player.jumps=0;this.player.standing=blockSupport?.id??`echo-${this.echoes.findIndex(e=>e===support)}`;if(blockSupport?.kind==='crumble'&&blockSupport.crumbleTouched===null)blockSupport.crumbleTouched=this.time;}
+    const support=shouldProbeSupport(amount,wasGrounded)?findSupport(this.playerRect(),[...this.blocks.filter(b=>b.active&&!(this.dropTimer>0&&b.kind==='oneway')),...this.echoes],2.5):null;if(support){const blockSupport=this.blocks.find(b=>b===support);this.player.y=support.y-PH;this.player.grounded=true;this.player.jumps=0;this.player.standing=blockSupport?.id??`echo-${this.echoes.findIndex(e=>e===support)}`;if(blockSupport?.kind==='crumble'&&blockSupport.crumbleTouched===null)blockSupport.crumbleTouched=this.time;}
   }
 
   private activateTraps():void{
@@ -483,7 +494,7 @@ export class IWannaGame {
   }
 
   private respawn():void{
-    const roomIndex=this.save.respawnRoom;if(roomIndex!==this.save.room){this.loadRoom(roomIndex,true);return;}this.player.x=this.save.respawnX;this.player.y=this.save.respawnY;this.player.vx=this.player.vy=0;this.player.jumps=0;this.dead=false;this.heat=Math.max(0,this.heat-18);this.combo=0;this.comboTimer=0;this.nearMissFx=0;this.stillTime=0;this.ghostSamples=[];this.ghostStartTime=this.time;this.ghostSampleClock=0;this.launcherCooldown.clear();this.crusherImpactCycle.clear();this.beatIndex=(this.room.beats??[]).filter(beat=>beat.x<=this.player.x).length;this.beatGold=0;this.beatFx=0;if(this.room.boss&&this.bossPhase<this.bossMax()){this.bossTimer=0;this.bossStageWaves=0;this.bossShots=[];this.history=[];}this.resetPressureSystems();this.resetRoomObjects();this.snapCamera();
+    const roomIndex=this.save.respawnRoom;if(roomIndex!==this.save.room){this.loadRoom(roomIndex,true);return;}this.echoes=echoesOutsideRespawnZone(this.echoes,this.save.respawnX,this.save.respawnY,PW,PH);this.player.x=this.save.respawnX;this.player.y=this.save.respawnY;this.player.vx=this.player.vy=0;this.player.jumps=0;this.dropTimer=0;this.dead=false;this.heat=Math.max(0,this.heat-18);this.combo=0;this.comboTimer=0;this.nearMissFx=0;this.stillTime=0;this.ghostSamples=[];this.ghostStartTime=this.time;this.ghostSampleClock=0;this.launcherCooldown.clear();this.crusherImpactCycle.clear();this.beatIndex=(this.room.beats??[]).filter(beat=>beat.x<=this.player.x).length;this.beatGold=0;this.beatFx=0;if(this.room.boss&&this.bossPhase<this.bossMax()){this.bossTimer=0;this.bossStageWaves=0;this.bossShots=[];this.history=[];}this.resetPressureSystems();this.resetRoomObjects();this.snapCamera();
   }
 
   private clearEchoes():void{this.echoes=[];this.resetRoomObjects();this.player.x=this.save.respawnX;this.player.y=this.save.respawnY;this.player.vx=this.player.vy=0;this.player.jumps=0;this.snapCamera();this.callbacks.onToast('残影已清空');}
@@ -509,6 +520,7 @@ export class IWannaGame {
     const c=this.ctx;c.clearRect(0,0,W,H);const papers=['#d9c9aa','#cbb4a5','#b9c0b9','#ab9ba3'];c.fillStyle=papers[(this.room?.chapter??1)-1];c.fillRect(0,0,W,H);
     if(!this.room)return;this.drawBackdrop(c);
     const shake=gentleShake(this.time,this.trauma,this.save.settings.shake,this.save.settings.reducedMotion),art=chapterArt(this.room.chapter),visualTime=this.save.settings.reducedMotion?0:this.time;c.save();c.translate(-this.cameraX+shake.x,-this.cameraY+shake.y);this.drawWorldScenery(c);
+    for(const sign of this.room.tutorialSigns??[])if(this.inViewX(sign.x,sign.w))this.drawTutorialSign(c,sign);
     if(this.room.pursuit)this.drawPursuit(c);
     for(const spotlight of this.room.spotlights??[])if(this.inViewX(spotlight.x,spotlight.w))drawSpotlight(c,spotlight,art,this.time);
     for(const zone of this.room.windZones??[])if(this.inViewX(zone.x,zone.w))this.drawWind(c,zone);
@@ -704,6 +716,13 @@ export class IWannaGame {
     const art=chapterArt(this.room.chapter),x=r.x+r.w/2,y=r.y+6,pulse=.5+.5*Math.sin(this.time*4);c.save();c.shadowColor=active?art.glow:'rgba(20,10,20,.32)';c.shadowBlur=active?18+10*pulse:7;c.strokeStyle=art.ink;c.lineWidth=3;c.fillStyle=shade(art.platformDark,-.04);this.roundRect(c,x-15,y+33,30,12,4);c.fill();c.stroke();c.shadowColor='transparent';c.fillStyle=art.paper;c.fillRect(x-4,y-3,8,39);c.strokeRect(x-4,y-3,8,39);c.fillStyle=active?art.secondary:art.accent;c.beginPath();c.moveTo(x+3,y);c.quadraticCurveTo(x+31,y+5,x+38,y+20);c.quadraticCurveTo(x+23,y+24,x+3,y+18);c.closePath();c.fill();c.stroke();c.fillStyle=active?art.glow:shade(art.paper,-.08);c.beginPath();c.arc(x,y-8,13,0,Math.PI*2);c.fill();c.stroke();c.fillStyle=art.ink;c.font='900 9px monospace';c.textAlign='center';c.fillText(active?'ON':'SAVE',x,y-5);c.restore();
   }
 
+  private drawTutorialSign(c:CanvasRenderingContext2D,sign:TutorialSignDef):void{
+    const art=chapterArt(this.room.chapter),rowHeight=(sign.h-66)/sign.rows.length;c.save();c.translate(sign.x,sign.y);c.rotate(-.012);c.shadowColor='rgba(20,11,20,.38)';c.shadowBlur=12;c.shadowOffsetY=9;c.fillStyle=shade(art.paper,.02);c.strokeStyle=art.ink;c.lineWidth=5;this.roundRect(c,0,0,sign.w,sign.h,8);c.fill();c.shadowColor='transparent';c.stroke();
+    c.fillStyle=art.hazard;c.fillRect(0,0,12,sign.h);c.fillStyle=art.accent;this.roundRect(c,22,17,176,35,4);c.fill();c.strokeStyle=art.ink;c.lineWidth=3;c.stroke();c.fillStyle=art.paper;c.font='900 18px "PingFang SC",sans-serif';c.textAlign='center';c.fillText(sign.title,110,41);c.fillStyle=art.ink;c.font='900 14px "PingFang SC",sans-serif';
+    for(const [index,row] of sign.rows.entries()){const y=66+index*rowHeight;c.fillStyle=index%2?'rgba(111,72,81,.08)':'rgba(213,174,105,.13)';c.fillRect(20,y,sign.w-40,rowHeight-3);c.fillStyle=art.hazard;this.roundRect(c,31,y+5,112,rowHeight-13,4);c.fill();c.fillStyle=art.paper;c.font='900 13px monospace';c.textAlign='center';c.fillText(row.keys,87,y+rowHeight*.62);c.fillStyle=art.ink;c.font='800 13px "PingFang SC",sans-serif';c.textAlign='left';c.fillText(row.label,158,y+rowHeight*.62);}
+    c.fillStyle=art.hazard;c.beginPath();c.moveTo(sign.w-43,23);c.lineTo(sign.w-18,35);c.lineTo(sign.w-43,47);c.closePath();c.fill();c.restore();
+  }
+
   private drawShard(c:CanvasRenderingContext2D,r:Rect):void{
     const art=chapterArt(this.room.chapter),x=r.x+r.w/2,y=r.y+r.h/2;c.save();c.translate(x,y);c.rotate(Math.sin(this.time*2)*.07-.07);c.shadowColor=art.glow;c.shadowBlur=13+Math.sin(this.time*4)*4;c.fillStyle=shade(art.accent,.15);c.strokeStyle=art.ink;c.lineWidth=3;this.roundRect(c,-23,-14,46,28,4);c.fill();c.shadowColor='transparent';c.stroke();c.fillStyle=art.paper;c.fillRect(-17,-9,34,18);c.strokeStyle=shade(art.paperShadow,-.05);c.lineWidth=1;c.strokeRect(-17,-9,34,18);c.fillStyle=art.ink;c.font='900 9px monospace';c.textAlign='center';c.fillText('MEMORY',0,3);c.beginPath();c.arc(-23,0,5,0,Math.PI*2);c.arc(23,0,5,0,Math.PI*2);c.fill();c.strokeStyle=art.hazard;c.lineWidth=2;c.beginPath();c.moveTo(-8,-8);c.lineTo(-4,8);c.stroke();c.restore();
   }
@@ -783,7 +802,7 @@ export class IWannaGame {
   private effectCount(base:number):number{return Math.max(0,Math.round(base*this.save.settings.particles*(this.lowDetail?.72:1)));}
   private spawnLanding():void{for(let i=0;i<Math.round(5*this.save.settings.particles);i++)this.particles.push({x:this.player.x+PW/2,y:this.player.y+PH,vx:(Math.random()-.5)*180,vy:-40-Math.random()*90,life:.18+Math.random()*.16,color:'#f7dfcb'});}
   private actionForCode(code:string):InputAction|undefined{
-    const b=this.save.settings.bindings;if(code===b.left||code==='ArrowLeft')return'left';if(code===b.right||code==='ArrowRight')return'right';if(code===b.jump||code==='KeyZ'||code==='ArrowUp')return'jump';if(code===b.restart)return'restart';return undefined;
+    const b=this.save.settings.bindings;if(code===b.left||code==='KeyA'||code==='ArrowLeft')return'left';if(code===b.right||code==='KeyD'||code==='ArrowRight')return'right';if(code===b.jump||code==='KeyW'||code==='KeyZ'||code==='ArrowUp')return'jump';if(code===b.drop||code==='KeyS'||code==='ArrowDown')return'drop';if(code===b.restart)return'restart';return undefined;
   }
   private emitHud(force=false):void{if(!force&&this.time<this.hudNext)return;this.hudNext=this.time+1/15;const contract=this.room.contract,seals=Object.values(this.save.bestRooms).filter(record=>record.contract).length+(this.contractCleared&&!this.save.bestRooms[this.room.id]?.contract?1:0),nextLock=this.buttons.find(button=>button.id.includes('-lock-')&&!button.pressed),remaining=this.buttons.filter(button=>button.id.includes('-lock-')&&!button.pressed).length;this.callbacks.onHud({room:this.save.room+1,deaths:this.save.deaths,shards:this.save.shards.length,elapsed:this.time,progress:Math.max(0,Math.min(1,(this.player.x+PW)/this.worldWidth())),jumps:Math.max(0,2-this.player.jumps),heat:Math.round(this.heat),echoes:this.echoes.length,mode:this.save.mode,director:this.directorCommand,beats:{current:this.beatIndex,total:this.room.beats?.length??0,gold:this.beatGold},combo:{value:this.combo,tier:comboTier(this.combo),nearMiss:this.nearMissFx>0},lock:{remaining,next:nextLock?requirementLabel(nextLock.requires):'已解除'},contract:{label:contract?.label??'无悬赏',description:contract?.description??'',state:!contract?'none':this.contractCleared?'cleared':this.contractFailed?'failed':'active',seals},boss:{active:!!this.room.boss&&this.bossPhase<this.bossMax(),phase:this.bossPhase+1,max:this.bossMax(),waves:this.bossStageWaves,required:this.bossWaveRequirement()}});}
   private persist():void{this.save.elapsed=this.time;this.callbacks.onSave(this.getSave());}

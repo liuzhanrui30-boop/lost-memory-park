@@ -39,21 +39,25 @@
     <section id="title-screen" class="screen visible title-screen">
       <div class="title-card">
         <div class="title-emblem" aria-hidden="true"><i></i><b>ADMIT ONE</b><i></i></div>
-        <p class="eyebrow">桌面手机双端版 · v12.4</p>
+        <p class="eyebrow">友好陷阱版 · v12.5</p>
         <h1>失忆乐园</h1>
-        <p class="tagline">只保留移动、双跳与重开，把难度集中到助跑、上升、下坠和反向落点。每个普通关卡扩为四幕，第四幕是章节专属返场挑战。</p>
+        <p class="tagline">只保留移动、双跳、下穿与重开，把难度集中到读招、走位和明确的落点。坑会更多，但不再靠别扭操作卡住玩家。</p>
         <div class="menu">
-          <button id="new-game" class="primary">开始挑战</button>
+          <button id="new-game" class="primary">开始新游戏</button>
           <button id="continue-game">暂无存档</button>
-          <button id="open-slots">存档槽</button><button id="open-chapters">章节选择</button>
-          <button id="start-speedrun">计时挑战</button><button id="open-modes">通关模式</button>
-          <button id="open-archive">记忆档案</button><button id="open-settings">设置</button>
-          <button id="open-credits">制作信息</button>
+          <button id="open-more">更多内容</button>
+          <button id="open-settings">设置</button>
         </div>
-        <p class="controls">电脑：A/D 或方向键移动　空格/Z 双跳　R 重开<br>手机：横屏自动显示拇指按钮；大小、透明度、位置和左右布局均可调整</p>
+        <p class="controls">电脑：WASD 移动/下穿　空格/Z 双跳　R 重开　右键单删残影<br>手机：横屏自动显示拇指按钮；大小、透明度、位置和左右布局均可调整</p>
       </div>
       <i class="halo h1"></i><i class="halo h2"></i>
     </section>
+
+    <section id="more-screen" class="screen hidden shade"><div class="panel more-panel"><p class="eyebrow">更多内容</p><h2>选择玩法</h2><div class="more-grid">
+      <button id="open-chapters">章节选择</button><button id="open-slots">存档管理</button>
+      <button id="start-speedrun">计时挑战</button><button id="open-modes">通关模式</button>
+      <button id="open-archive">记忆档案</button><button id="open-credits">制作信息</button>
+    </div><button id="close-more" class="primary">返回首页</button></div></section>
 
     <section id="pause-screen" class="screen hidden shade">
       <div class="panel"><p class="eyebrow">挑战暂停</p><h2>喘口气</h2>
@@ -111,7 +115,7 @@
     <section id="chapters-screen" class="screen hidden shade"><div class="panel"><p class="eyebrow">章节选择</p><h2>已走过的舞台</h2><div id="chapter-list"></div><button id="close-chapters">返回</button></div></section>
     <section id="modes-screen" class="screen hidden shade"><div class="panel"><p class="eyebrow">通关后舞台</p><h2>换一种方式重来</h2><p class="panel-copy">Boss Rush 连战四位舞台主人；镜像模式翻转画面与方向；导演失控会为每个房间稳定抽取一种疯狂规则。均需先完成任一结局。</p><button id="start-director" class="director-mode">导演失控 · 五种指令轮换</button><button id="start-bossrush">Boss Rush</button><button id="start-mirror">镜像模式</button><button id="close-modes">返回</button></div></section>
     <section id="archive-screen" class="screen hidden shade"><div class="panel archive-panel"><p class="eyebrow">广播与记忆</p><h2>记忆档案</h2><div id="archive-list"></div><button id="close-archive">返回</button></div></section>
-    <section id="credits-screen" class="screen hidden shade"><div class="panel credits-panel"><p class="eyebrow">制作信息</p><h2>失忆乐园</h2><div class="credits-copy"><p><b>桌面手机双端版 · v12.4</b></p><p>原创非像素 Canvas 高难平台游戏。程序、美术、宽地图、关卡、文字与 WebAudio 全部内嵌，无外链资源。</p><p><b>双端控制</b><br>电脑保持高清键盘、手柄体验；手机横屏会自动显示安全区触控按钮，支持多点触控、方向滑动换向、触觉反馈，并可调整方向键大小、跳跃键大小、透明度、底部距离和左右手布局。手机采用仍高于实际屏幕显示需求的 1280×720 内部画布以稳定帧率，桌面保持 1600×900 至 1920×1080。</p><p><b>操作</b><br>A/D 或方向键移动；空格/Z 双跳；R 返回检查点；退格清除残影；Esc 暂停。</p></div><button id="close-credits">返回</button></div></section>
+    <section id="credits-screen" class="screen hidden shade"><div class="panel credits-panel"><p class="eyebrow">制作信息</p><h2>失忆乐园</h2><div class="credits-copy"><p><b>友好陷阱版 · v12.5</b></p><p>原创非像素 Canvas 高难平台游戏。程序、美术、宽地图、关卡、文字与 WebAudio 全部内嵌，无外链资源。</p><p><b>双端控制</b><br>电脑保持高清键盘、手柄体验；手机横屏会自动显示安全区触控按钮，支持多点触控、方向滑动换向、触觉反馈，并可调整方向键大小、跳跃键大小、透明度、底部距离和左右手布局。手机采用仍高于实际屏幕显示需求的 1280×720 内部画布以稳定帧率，桌面保持 1600×900 至 1920×1080。</p><p><b>操作</b><br>A/D 或方向键移动；W/空格/Z 双跳；S/下方向键穿过薄板；R 返回检查点；右键只删除点中的残影；退格清除全部残影；Esc 暂停。</p></div><button id="close-credits">返回</button></div></section>
     <section id="memory-flash" class="memory-flash hidden"><div><small id="memory-title"></small><p id="memory-text"></p><span>空格 / 点击跳过</span></div></section>
 
     <div id="room-card" class="room-card hidden"><small id="chapter-label">第 1 章</small><h2 id="room-title"></h2><p id="room-hint"></p></div>
@@ -124,7 +128,7 @@
         <button class="touch-left" data-action="left" aria-label="向左"><span>◀</span><small>左</small></button>
         <button class="touch-right" data-action="right" aria-label="向右"><span>▶</span><small>右</small></button>
       </div>
-      <div class="touch-action"><button class="touch-jump" data-action="jump" aria-label="跳跃"><span>跳</span><small>二段跳</small></button></div>
+      <div class="touch-action"><button class="touch-drop" data-action="drop" aria-label="向下穿过薄板"><span>↓</span><small>下穿</small></button><button class="touch-jump" data-action="jump" aria-label="跳跃"><span>跳</span><small>二段跳</small></button></div>
     </div>
     <div id="orientation-hint" class="orientation-hint" aria-hidden="true"><div><b>↻</b><strong>请将手机横过来</strong><span>横屏拥有完整视野与双拇指按钮</span></div></div>
 

@@ -15,6 +15,6 @@ describe('director commands',()=>{
     expect(createRunSeed(2,123)).toBeGreaterThan(0);
     expect(createRunSeed(2,123)).toBe(createRunSeed(2,123));
     const save=newV2Save();expect(save.version).toBe(5);expect(save.runSeed).toBeGreaterThan(0);
-    expect(defaultSettings().bindings).toEqual({left:'KeyA',right:'KeyD',jump:'Space',restart:'KeyR',pause:'Escape'});
+    expect(defaultSettings().bindings).toEqual({left:'KeyA',right:'KeyD',jump:'Space',drop:'KeyS',restart:'KeyR',pause:'Escape'});
   });
 });

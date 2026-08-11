@@ -36,7 +36,8 @@ describe('v8 no-hold-forward execution campaign',()=>{
 
   it('makes the prologue demand a real jump before auto-launch devices can help',()=>{
     const prologue=rooms.find(room=>room.kind==='prologue')!;
-    expect(prologue.spikes.filter(spike=>spike.id.startsWith('opening-mandatory-jump-'))).toHaveLength(4);
+    expect(prologue.spikes.filter(spike=>spike.id.startsWith('opening-mandatory-jump-'))).toHaveLength(3);
+    expect(prologue.tutorialSigns).toHaveLength(1);
   });
 
   it('remains free of data soft-locks and invalid timing windows',()=>expect(validateRooms()).toEqual([]));

@@ -43,8 +43,8 @@ h1 { margin: 8px 0 2px; font: 900 clamp(64px, 10vw, 104px)/1 "STKaiti", "KaiTi",
 h2 { margin: 8px 0 22px; font-size: 34px; }
 .tagline { font-weight: 800; }
 .menu, .panel { display: grid; gap: 12px; }
-.menu { width: min(410px, 100%); margin: 27px auto 18px; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.menu button:nth-child(1), .menu button:nth-child(2) { grid-column:1/-1; }
+.menu { width:min(470px,100%); margin:24px auto 18px; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.menu button { min-height:52px; }
 button {
   border: 3px solid #302632; border-radius: 5px; padding: 12px 22px; cursor: pointer;
   color: #302632; background: #f0e6d1; font-weight: 900; box-shadow: 4px 4px 0 #302632;
@@ -57,6 +57,9 @@ button.primary { color: #f5ead5; background: #a73e4a; }
 .halo { display: none; }
 .shade { color: #302632; background: rgba(48,38,50,.72); }
 .panel { width: min(410px,94vw); transform: rotate(.3deg); }
+.more-panel { width:min(540px,94vw); }
+.more-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; }
+.more-grid button { min-height:50px; }
 .settings-panel { width:min(560px,94vw); max-height:92vh; }
 .settings-scroll { overflow:auto; padding-right:6px; max-height:63vh; display:grid; gap:9px; }
 .settings-scroll h3 { margin:12px 0 0; text-align:left; color:#a33e49; font:900 13px monospace; letter-spacing:.12em; border-bottom:2px dashed #8e7470; padding-bottom:5px; }
@@ -100,6 +103,9 @@ button.primary { color: #f5ead5; background: #a73e4a; }
 .touch-move { padding:calc(7px * var(--touch-scale,1)); border:1px solid rgba(255,232,193,.22); border-radius:calc(30px * var(--touch-scale,1)); background:rgba(28,18,28,.3); }
 .touch-left { border-radius:50% 26% 26% 50% !important; }
 .touch-right { border-radius:26% 50% 50% 26% !important; }
+.touch-action { align-items:end; }
+.touch-drop { width:calc(62px * var(--touch-scale,1)) !important; height:calc(62px * var(--touch-scale,1)) !important; border-radius:50% !important; }
+.touch-drop span { font-size:calc(22px * var(--touch-scale,1)) !important; }
 .touch-jump { width:calc(90px * var(--touch-scale,1) * var(--touch-jump-scale,1.12)) !important; height:calc(90px * var(--touch-scale,1) * var(--touch-jump-scale,1.12)) !important; border-radius:50% !important; color:#302632 !important; background:linear-gradient(145deg,rgba(255,218,119,.95),rgba(196,86,93,.94)) !important; }
 .touch-jump span { font-family:"PingFang SC",sans-serif !important; font-size:calc(25px * var(--touch-scale,1) * var(--touch-jump-scale,1.12)) !important; }
 .touch-pause { position:absolute; top:calc(-54px * var(--touch-scale,1)); right:4px; width:calc(42px * var(--touch-scale,1)) !important; height:calc(42px * var(--touch-scale,1)) !important; border-radius:50% !important; }
@@ -204,9 +210,8 @@ button.primary { color: #f5ead5; background: #a73e4a; }
   .touch-capable h1 { margin:1px 0 4px; font-size:42px; }
   .touch-capable .title-card .tagline { display:none; }
   .touch-capable .title-card .eyebrow { font-size:10px; }
-  .touch-capable .menu { width:min(720px,100%); margin:8px auto 6px; grid-template-columns:repeat(3,1fr); gap:6px; }
+  .touch-capable .menu { width:min(620px,100%); margin:8px auto 6px; grid-template-columns:repeat(2,1fr); gap:6px; }
   .touch-capable .menu button:nth-child(n) { grid-column:auto; min-height:37px; padding:6px 8px; font-size:12px; box-shadow:2px 3px 0 #302632; }
-  .touch-capable .menu button:nth-child(1),.touch-capable .menu button:nth-child(2) { grid-column:auto; }
   .touch-capable .controls { font-size:9px; line-height:1.35; }
   .touch-capable .panel,.touch-capable .ending-card { width:min(640px,96vw); max-height:94vh; padding:15px 20px; overflow:auto; }
   .touch-capable .panel h2,.touch-capable .ending-card h2 { margin:3px 0 10px; font-size:25px; }

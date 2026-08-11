@@ -61,6 +61,12 @@ export interface OptionalCollectible extends Rect {
   text: string;
 }
 
+export interface TutorialSignDef extends Rect {
+  id:string;
+  title:string;
+  rows:Array<{keys:string;label:string}>;
+}
+
 export interface BossDef {
   id: string;
   name: string;
@@ -120,6 +126,7 @@ export interface RoomDef {
   sentries?:SentryDef[];
   attackTheme?:string;
   contract?:ContractDefinition;
+  tutorialSigns?:TutorialSignDef[];
 }
 
 export interface AccessibilitySettings {
@@ -153,7 +160,7 @@ export interface AccessibilitySettings {
   dialogueSpeed: number;
   showGhost:boolean;
   heatHud:boolean;
-  bindings: Record<'left'|'right'|'jump'|'restart'|'pause', string>;
+  bindings: Record<'left'|'right'|'jump'|'drop'|'restart'|'pause', string>;
 }
 
 export const defaultSettings = (): AccessibilitySettings => ({
@@ -163,7 +170,7 @@ export const defaultSettings = (): AccessibilitySettings => ({
   showHiddenTraps: false, gamepad: true, touch: false, touchMode: 'auto', touchScale: 1, touchJumpScale: 1.12, touchOpacity: .72, touchInset: 18,
   touchLeftHanded: false, haptics: true, colorFriendly: false, dialogueSpeed: 1,
   showGhost: false, heatHud: true,
-  bindings: { left:'KeyA', right:'KeyD', jump:'Space', restart:'KeyR', pause:'Escape' },
+  bindings: { left:'KeyA', right:'KeyD', jump:'Space', drop:'KeyS', restart:'KeyR', pause:'Escape' },
 });
 
 export interface V2Save {

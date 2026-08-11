@@ -13,10 +13,12 @@ describe('v7 extreme performance campaign',()=>{
     for(const room of normal){expect(room.sentries).toHaveLength(2);expect(room.contract).toBeTruthy();}
   });
 
-  it('replaces broad demo platforms with narrow precision sequences',()=>{
+  it('keeps precision sequences compact while widening required landings',()=>{
     for(const room of normal){
       const precision=room.blocks.filter(block=>/v6-\d+-(second|finale)-p\d/.test(block.id));
-      expect(precision).toHaveLength(6);expect(Math.max(...precision.map(block=>block.w))).toBeLessThanOrEqual(88);
+      expect(precision).toHaveLength(6);
+      expect(Math.max(...precision.map(block=>block.w))).toBeLessThanOrEqual(104);
+      expect(Math.min(...precision.map(block=>block.w))).toBeGreaterThanOrEqual(72);
       expect(room.spikes.some(spike=>spike.id.includes('-edge-'))).toBe(true);
     }
   });

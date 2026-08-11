@@ -133,7 +133,7 @@ function scaffold(state:BuildState,prefix:string,start:number,end:number,variant
     [[23,375,72],[51,525,60],[80,350,60]],
   ];
   const layout=layouts[variant%layouts.length];
-  const platforms=layout.map(([percent,y,w,h],i)=>block(`${prefix}-p${i}`,start+Math.round(span*percent/100),y,w,'solid',h?{h}:{}));
+  const platforms=layout.map(([percent,y,w,h],i)=>block(`${prefix}-p${i}`,start+Math.round(span*percent/100),y,w+14,'solid',h?{h}:{}));
   const highRoute=block(`${prefix}-high-route`,start+Math.round(span*(variant%2?.66:.43)),250+(variant%3)*30,72,'oneway');
   state.blocks.push(safeFloor,...platforms,highRoute,landing);addPit(state.spikes,prefix,start+18,end-18);return{prefix,start,end,platforms,safeFloor,landing};
 }
@@ -182,7 +182,7 @@ function addExecution(state:BuildState,act:ActScaffold,execution:ExecutionId,cha
   else if(execution==='reverse-cannon')state.launchers.push({id,x:p2.x+p2.w/2-29,y:p2.y-55,w:58,h:55,vx:-500-chapter*24,vy:-610,facing:-1,cooldown:.7});
 }
 
-function addSkillLock(state:BuildState,act:ActScaffold,index:number,slot:'A'|'B',requires:ButtonRequirement):void{
+function addSkillLock(state:BuildState,act:ActScaffold,index:number,slot:'A'|'B',requires:ButtonRequirement):BlockDef{
   const gateId=`v9-${index}-lock-${slot}`,candidates=act.platforms.filter(platform=>platform.kind===undefined||platform.kind==='solid'||platform.kind==='oneway'||platform.kind==='ice'||platform.kind==='sticky'||platform.kind==='conveyor');
   let platform=requires==='momentum'?block(`v12-${index}-runway-${slot}`,act.end-275,535-(index%2)*42,188,'oneway'):candidates[(index+(slot==='A'?1:2))%candidates.length];
   if(requires==='momentum')state.blocks.push(platform);
@@ -190,8 +190,10 @@ function addSkillLock(state:BuildState,act:ActScaffold,index:number,slot:'A'|'B'
   state.blocks.push({id:gateId,x:act.end-48,y:120,w:34,h:540,kind:'gate'});
   state.buttons.push({id:`${gateId}-switch`,x:platform.x+platform.w/2-23,y:platform.y-27,w:46,h:27,target:gateId,requires,label:`${requirementLabel(requires)}锁 ${slot} 已解除`});
   // 锁后给出一个短暂安全落点，让难度形成“压力—解题—呼吸—再升级”的锯齿节奏。
-  state.blocks.push(block(`v9-${index}-recovery-${slot}`,act.end+4,565-(index%2)*44,78,'oneway'));
+  const recovery=block(`v9-${index}-recovery-${slot}`,act.end+4,565-(index%2)*44,104,'oneway');state.blocks.push(recovery);return recovery;
 }
+
+function checkpointOn(platform:BlockDef):{x:number;y:number;w:number;h:number}{return{x:platform.x+26,y:platform.y-60,w:34,h:60};}
 
 const ENCORE_LABELS:Record<number,readonly string[]>={
   1:['糖牙返场','焦糖断桥','礼盒加演','糖浆终拍','棒糖回旋','巨口谢幕'],
@@ -204,9 +206,9 @@ function addEncore(state:BuildState,index:number,chapter:number):{label:string;o
   const prefix=`v12-${index}-encore`,shift=index%2?10:0;
   state.blocks.push(floor(`${prefix}-rest`,2968,86),floor(`${prefix}-landing`,3370,70));
   addPit(state.spikes,prefix,3038,3370);
-  const p0=block(`${prefix}-p0`,3064,544-(index%3)*18,62,'oneway');
-  const p1=block(`${prefix}-p1`,3172,422+(index%2)*28,58,'oneway');
-  const p2=block(`${prefix}-p2`,3280,536-(index%2)*36,60,'oneway');
+  const p0=block(`${prefix}-p0`,3060,550-(index%3)*14,78,'oneway');
+  const p1=block(`${prefix}-p1`,3168,452+(index%2)*20,74,'oneway');
+  const p2=block(`${prefix}-p2`,3276,540-(index%2)*28,78,'oneway');
   const high=block(`${prefix}-high`,3200+(index%3)*7,300-(index%2)*20,76,'oneway');
   state.blocks.push(p0,p1,p2,high);
 
@@ -277,20 +279,20 @@ function directedRoom(room:RoomDef,index:number):RoomDef{
   state.blocks.push(floor(`v6-${index}-rest-a`,1490,128),floor(`v6-${index}-rest-b`,2200,118));
   const second=scaffold(state,`v6-${index}-second`,1640,2180,index),finale=scaffold(state,`v6-${index}-finale`,2330,2990,index+2);
   recipe.secondAct.forEach((mechanic,slot)=>applyMechanic(state,second,mechanic,slot,room.chapter));recipe.finale.forEach((mechanic,slot)=>applyMechanic(state,finale,mechanic,slot+2,room.chapter));
-  dressAct(state,second,room.chapter,index);dressAct(state,finale,room.chapter,index+3);addExecution(state,second,execution.second,room.chapter,index);addExecution(state,finale,execution.finale,room.chapter,index+3);addSkillLock(state,second,index,'A',lockScript.A);addSkillLock(state,finale,index,'B',lockScript.B);
+  dressAct(state,second,room.chapter,index);dressAct(state,finale,room.chapter,index+3);addExecution(state,second,execution.second,room.chapter,index);addExecution(state,finale,execution.finale,room.chapter,index+3);const recoveryA=addSkillLock(state,second,index,'A',lockScript.A),recoveryB=addSkillLock(state,finale,index,'B',lockScript.B);
   const branchX=recipe.branchSide==='second'?1980:2745,branchY=300+(index%3)*35;state.blocks.push(block(`v6-${index}-branch-step`,branchX-145,branchY+105,112,'oneway'),block(`v6-${index}-branch`,branchX,branchY,118,'oneway'));
   const encore=addEncore(state,index,room.chapter);
   const optional:OptionalCollectible={id:`note-directed-${index+1}`,x:branchX+44,y:branchY-42,w:28,h:34,title:`导演手记 ${String(index+1).padStart(2,'0')}`,text:[...recipe.labels].join('。')+'。这不是随机事故，而是写进节目单的顺序。'};
   const beats:BeatDefinition[]=[{x:1160,label:recipe.labels[0],intensity:.35},{x:2140,label:recipe.labels[1],intensity:.64,checkpoint:true},{x:2920,label:recipe.labels[2],intensity:.86,checkpoint:true},{x:3360,label:encore.label,intensity:1,checkpoint:true}];
   const baseSpeed=[0,130,149,168,187][room.chapter],maxSpeed=[0,224,249,274,298][room.chapter];
   const pursuit=index%6===5?{id:`v10-pursuit-${index}`,startX:-115,triggerX:260,baseSpeed,maxSpeed,width:96}:undefined;
-  return{...structuredClone(room),worldWidth:WIDTH,worldHeight:720,exit:{...room.exit,x:WIDTH-58,y:566,w:42,h:94},blocks:state.blocks,spikes:state.spikes,traps:state.traps,buttons:state.buttons,lasers:state.lasers,launchers:state.launchers,portals:[],crushers:state.crushers,spotlights:state.spotlights,windZones:state.windZones,checkpoints:[...(room.checkpoints??(room.checkpoint?[room.checkpoint]:[])),{x:1482,y:600,w:34,h:60},{x:2215,y:600,w:34,h:60},{x:2982,y:600,w:34,h:60}],optional:[...(room.optional??[]),optional,encore.optional],beats,landmark:recipe.landmark,remixKind:`${requirementLabel(lockScript.A)}锁+${requirementLabel(lockScript.B)}锁→${recipe.secondAct.join('+')}→${recipe.finale.join('+')}→${encore.label}`,pursuit,sentries:sentriesFor(index,room.chapter),attackTheme:CHAPTER_ATTACK_THEMES[room.chapter],contract:HARD_CONTRACTS[index]};
+  return{...structuredClone(room),worldWidth:WIDTH,worldHeight:720,exit:{...room.exit,x:WIDTH-58,y:566,w:42,h:94},blocks:state.blocks,spikes:state.spikes,traps:state.traps,buttons:state.buttons,lasers:state.lasers,launchers:state.launchers,portals:[],crushers:state.crushers,spotlights:state.spotlights,windZones:state.windZones,checkpoints:[...(room.checkpoints??(room.checkpoint?[room.checkpoint]:[])),{x:1482,y:600,w:34,h:60},checkpointOn(recoveryA),checkpointOn(recoveryB)],optional:[...(room.optional??[]),optional,encore.optional],beats,landmark:recipe.landmark,remixKind:`${requirementLabel(lockScript.A)}锁+${requirementLabel(lockScript.B)}锁→${recipe.secondAct.join('+')}→${recipe.finale.join('+')}→${encore.label}`,pursuit,sentries:sentriesFor(index,room.chapter),attackTheme:CHAPTER_ATTACK_THEMES[room.chapter],contract:HARD_CONTRACTS[index]};
 }
 
 export function upgradePrologue(room:RoomDef):RoomDef{
-  const blocks=[floor('opening-floor-a',0,640),block('opening-crumble-a',720,540,132,'crumble',{crumbleDelay:.42,crumbleRespawn:1.65}),block('opening-crumble-b',900,455,132,'crumble',{crumbleDelay:.4,crumbleRespawn:1.7}),block('opening-high-step',1080,390,125,'oneway'),block('opening-landing-step',1195,505,96,'oneway'),floor('opening-floor-b',1280,680)];
-  const pit=[] as SpikeDef[];addPit(pit,'opening',640,1280);for(let i=0;i<4;i++)pit.push({id:`opening-mandatory-jump-${i}`,x:300+i*30,y:630,w:30,h:30,direction:'up'});
-  return{...structuredClone(room),name:'序章 · 三十秒抓住你',hint:'大炮起跳，沿着三块高台越过刺坑；红色抛物线出现时立刻换位。',message:'广播：今晚取消传送门。路线只有一条，看清预警再跑。',worldWidth:1960,exit:{x:1895,y:566,w:42,h:94},blocks,spikes:pit,traps:[],launchers:[{id:'opening-launcher',x:565,y:600,w:66,h:60,vx:575,vy:-735,facing:1}],portals:[],crushers:[{id:'opening-hand',x:1570,y:70,w:112,h:190,axis:'y',distance:385,period:2.8,phase:.35}],spotlights:[],windZones:[],lasers:[],buttons:[],checkpoints:[{x:1430,y:600,w:34,h:60}],beats:[{x:480,label:'大炮点火',intensity:.2},{x:1120,label:'高台穿刺',intensity:.5},{x:1760,label:'逃离巨手',intensity:.82,checkpoint:true}],landmark:'candy-press',pursuit:{id:'opening-pursuit',startX:-120,triggerX:270,baseSpeed:105,maxSpeed:188,width:92},sentries:[{id:'opening-sentry',x:1510,y:245,range:620,period:3.05,projectileSpeed:300,warning:.9,phase:.4,pattern:'arc',label:'糖豆抛射',shotColor:'#d65365'}],attackTheme:'糖豆抛射',contract:{id:'opening-contract',label:'开场试镜',description:'35 秒内逃出序章。失败不阻挡通关。',rule:'speed',target:35}};
+  const blocks=[floor('opening-floor-a',0,640),block('opening-crumble-a',712,542,152,'crumble',{crumbleDelay:.5,crumbleRespawn:1.75}),block('opening-crumble-b',892,462,152,'crumble',{crumbleDelay:.48,crumbleRespawn:1.8}),block('opening-high-step',1072,400,142,'oneway'),block('opening-landing-step',1192,510,112,'oneway'),floor('opening-floor-b',1280,680)];
+  const pit=[] as SpikeDef[];addPit(pit,'opening',640,1280);for(let i=0;i<3;i++)pit.push({id:`opening-mandatory-jump-${i}`,x:330+i*30,y:630,w:30,h:30,direction:'up'});
+  return{...structuredClone(room),name:'序章 · 先学会活着',hint:'先看指示牌熟悉 WASD；大炮和尖刺会依次教你移动、跳跃与二段跳。',message:'广播：先看牌子。今晚的第一场排练，不要求你立刻完美。',worldWidth:1960,exit:{x:1895,y:566,w:42,h:94},blocks,spikes:pit,traps:[],launchers:[{id:'opening-launcher',x:565,y:600,w:66,h:60,vx:565,vy:-710,facing:1}],portals:[],crushers:[{id:'opening-hand',x:1570,y:70,w:112,h:190,axis:'y',distance:385,period:3.2,phase:.35}],spotlights:[],windZones:[],lasers:[],buttons:[],checkpoints:[{x:1430,y:600,w:34,h:60}],beats:[{x:500,label:'按键排练',intensity:.12},{x:1120,label:'高台穿刺',intensity:.42},{x:1760,label:'逃离巨手',intensity:.72,checkpoint:true}],tutorialSigns:[{id:'wasd-guide',x:74,y:330,w:430,h:242,title:'新手指示牌',rows:[{keys:'A / D',label:'左右移动'},{keys:'W / 空格',label:'跳跃 · 再按一次二段跳'},{keys:'S / ↓',label:'向下穿过薄板'},{keys:'R',label:'回到最近检查点'},{keys:'右键 / 退格',label:'单删 / 全清死亡残影'}]}],landmark:'candy-press',pursuit:{id:'opening-pursuit',startX:-120,triggerX:540,baseSpeed:96,maxSpeed:174,width:92},sentries:[{id:'opening-sentry',x:1510,y:245,range:620,period:3.25,projectileSpeed:282,warning:1.05,phase:.4,pattern:'arc',label:'糖豆抛射',shotColor:'#d65365'}],attackTheme:'糖豆抛射',contract:{id:'opening-contract',label:'开场试镜',description:'45 秒内逃出序章。失败不阻挡通关。',rule:'speed',target:45}};
 }
 
 function upgradeBoss(room:RoomDef):RoomDef{

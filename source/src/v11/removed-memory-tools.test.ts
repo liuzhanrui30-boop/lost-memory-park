@@ -8,7 +8,7 @@ describe('v11 focused movement rule set',()=>{
     const settings=defaultSettings() as unknown as Record<string,unknown>;
     expect(settings).not.toHaveProperty('bonusRewind');expect(settings).not.toHaveProperty('skipBossStage');
     expect(settings).not.toHaveProperty('extraDash');
-    expect(settings.bindings).toEqual({left:'KeyA',right:'KeyD',jump:'Space',restart:'KeyR',pause:'Escape'});
+    expect(settings.bindings).toEqual({left:'KeyA',right:'KeyD',jump:'Space',drop:'KeyS',restart:'KeyR',pause:'Escape'});
     expect(newV2Save()).not.toHaveProperty('rewindBonus');expect(newV2Save()).not.toHaveProperty('anchorTutorialSeen');
   });
 
