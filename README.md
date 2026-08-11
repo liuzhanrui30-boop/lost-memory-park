@@ -21,6 +21,26 @@
 
 根目录的 [`index.html`](index.html) 是已经内嵌 CSS、JavaScript 与全部游戏内容的离线单文件版本。下载后双击即可运行，不需要服务器、账号或联网资源。
 
+## 完整源码与 AI 继续开发
+
+仓库已经公开保存游戏的**全部可编辑源码**，包括 TypeScript、HTML、CSS、关卡数据、WebAudio、单元测试、浏览器验收、构建脚本和从设计到部署的完整文档。美术和声音均由代码生成，因此不存在只留在作者电脑、没有上传的外部素材工程。
+
+- [AI 开发入口 `AGENTS.md`](AGENTS.md)
+- [AI 继续开发交接书 `AI_HANDOFF.md`](AI_HANDOFF.md)
+- [机器可读项目状态 `docs/project-state.json`](docs/project-state.json)
+- [参与开发与验收规则 `CONTRIBUTING.md`](CONTRIBUTING.md)
+
+新的 AI 或开发者克隆仓库后可直接执行：
+
+```bash
+cd source
+npm ci
+npm test
+npm run dev
+```
+
+推送 `main` 后，GitHub Actions 会自动测试、重新构建并更新永久游玩链接；不需要手工上传网页。
+
 ## 一句话介绍
 
 玩家控制失去颜色与记忆的白色纸偶，在由“笑脸园长”管理的失控游乐园中，只依靠移动、双跳、下穿薄板与快速重开，通过会欺骗玩家的舞台机关，找回 12 段核心记忆并决定乐园的结局。
@@ -67,6 +87,7 @@
 | 模式 | 故事、计时挑战、Boss Rush、镜像、导演失控 |
 | 存档 | 3 个本地槽位，可导入/导出 JSON |
 | 自动测试 | 27 个测试文件，98 项测试 |
+| 浏览器验收 | 递进结构、手机触控、性能 3 组真实 Chrome 验收 |
 
 ## 双端画质与性能
 
@@ -87,6 +108,8 @@ v12.6 延续按设备使用两档明确的内部画布，不让浏览器盲目�
 .
 ├── index.html                 # GitHub Pages 与离线游玩的单文件正式版
 ├── README.md                  # 项目入口与快速说明
+├── AGENTS.md                  # 所有 AI 必须遵循的仓库规则
+├── AI_HANDOFF.md              # 当前状态、架构与继续开发交接书
 ├── LICENSE                    # MIT 代码许可证
 ├── CONTRIBUTING.md            # 修改、测试与提交规范
 ├── CHANGELOG.md               # 版本变化记录
@@ -100,7 +123,9 @@ v12.6 延续按设备使用两档明确的内部画布，不让浏览器盲目�
 │   ├── 07-测试调试与性能.md
 │   ├── 08-从零到一开发教程.md
 │   ├── 09-发布部署与维护.md
-│   └── 10-代码导读与扩展.md
+│   ├── 10-代码导读与扩展.md
+│   └── project-state.json     # 机器可读当前状态
+├── .github/workflows/         # PR 验证与 GitHub Pages 自动部署
 └── source/                    # 完整可构建 TypeScript 源码
     ├── index.html
     ├── package.json
@@ -109,6 +134,7 @@ v12.6 延续按设备使用两档明确的内部画布，不让浏览器盲目�
     ├── vite.config.ts
     ├── vitest.config.ts
     ├── scripts/
+    ├── qa/                    # 真实浏览器验收与性能脚本
     └── src/
 ```
 
@@ -127,6 +153,7 @@ Vite 会给出本地地址。修改代码后运行：
 ```bash
 npm test
 npm run build
+npm run qa:browser
 ```
 
 构建产生：
@@ -142,6 +169,8 @@ npm run release:pages
 ```
 
 然后提交根目录 `index.html` 即可更新 GitHub Pages。
+
+完整发布建议直接运行 `npm run release:pages`；该命令会依次执行测试、类型检查、生产构建、单文件生成、根页面同步和 SHA-256 一致性校验。推送 `main` 后，Actions 流水线会再次执行相同质量门并自动部署。
 
 ## 文档导航
 

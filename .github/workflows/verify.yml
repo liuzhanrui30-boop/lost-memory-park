@@ -1,12 +1,18 @@
-name: Verify source
+name: Verify pull request
 on:
-  push:
-    paths:
-      - 'source/**'
-      - '.github/workflows/verify.yml'
   pull_request:
     paths:
       - 'source/**'
+      - 'index.html'
+      - 'AGENTS.md'
+      - 'AI_HANDOFF.md'
+      - 'docs/**'
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
   test-and-build:
     runs-on: ubuntu-latest
@@ -23,3 +29,9 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+      - run: npm run check:release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lost-memory-park-standalone
+          path: source/dist/lost-memory-park.html
+          if-no-files-found: error

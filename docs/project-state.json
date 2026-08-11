@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-11",
+  "project": {
+    "name": "失忆乐园",
+    "edition": "递进闯关版",
+    "version": "12.6.0",
+    "language": "zh-CN",
+    "repository": "https://github.com/liuzhanrui30-boop/lost-memory-park",
+    "playUrl": "https://liuzhanrui30-boop.github.io/lost-memory-park/"
+  },
+  "sourceOfTruth": {
+    "directory": "source",
+    "entryHtml": "source/index.html",
+    "entryCode": "source/src/main.ts",
+    "runtimeOwner": "source/src/v2/IWannaGame.ts",
+    "campaign": "source/src/v6/campaign.ts",
+    "types": "source/src/v2/types.ts",
+    "publishedArtifact": "index.html",
+    "publishedArtifactIsGenerated": true
+  },
+  "technology": [
+    "TypeScript",
+    "Vite",
+    "Vitest",
+    "Canvas 2D",
+    "WebAudio",
+    "localStorage"
+  ],
+  "content": {
+    "scenes": 30,
+    "prologue": 1,
+    "normalRooms": 24,
+    "bossRooms": 4,
+    "epilogue": 1,
+    "chapters": 4,
+    "roomsPerChapter": 6,
+    "segmentsPerNormalRoom": 4,
+    "memoryShards": 12,
+    "endings": 4
+  },
+  "progression": {
+    "chapterTiers": ["入门", "练习", "组合", "变化", "考核", "终局"],
+    "segmentRoles": ["learn", "practice", "test", "finish"],
+    "segmentLabels": ["学习", "练习", "考验", "终点"],
+    "sentriesByTier": [0, 1, 1, 1, 2, 2]
+  },
+  "controls": {
+    "move": ["A/D", "ArrowLeft/ArrowRight", "touch"],
+    "jump": ["Space", "Z", "W", "ArrowUp", "touch"],
+    "drop": ["S", "ArrowDown", "touch"],
+    "restart": ["R"],
+    "pause": ["Escape", "touch"],
+    "deleteOneEcho": ["MouseRight"],
+    "clearEchoes": ["Backspace"]
+  },
+  "removedSystems": [
+    "dash",
+    "playerAttack",
+    "memoryAnchor",
+    "memoryRewind",
+    "randomPortal",
+    "bossSkip",
+    "nearMissCombo",
+    "stageHeat"
+  ],
+  "quality": {
+    "unitTestFiles": 27,
+    "unitTests": 98,
+    "browserSuites": 3,
+    "targetFps": 60,
+    "desktopInternalMinimum": "1600x900",
+    "desktopInternalMaximum": "1920x1080",
+    "mobileInternal": "1280x720"
+  },
+  "commands": {
+    "install": "cd source && npm ci",
+    "develop": "cd source && npm run dev",
+    "test": "cd source && npm test",
+    "build": "cd source && npm run build",
+    "verifyPublishedArtifact": "cd source && npm run check:release",
+    "browserQa": "cd source && npm run qa:browser",
+    "prepareRelease": "cd source && npm run release:pages"
+  },
+  "deployment": {
+    "branch": "main",
+    "provider": "GitHub Pages",
+    "mode": "GitHub Actions",
+    "workflow": ".github/workflows/deploy-pages.yml",
+    "protectedScope": "Only liuzhanrui30-boop/lost-memory-park; never modify AMA organization data"
+  }
+}
