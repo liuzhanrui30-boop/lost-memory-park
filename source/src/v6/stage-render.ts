@@ -1,6 +1,7 @@
 import { shade, type ChapterArt } from '../v4/art-direction';
 import type { BeatDefinition, CrusherDef, LandmarkId, LauncherDef, PortalDef, SpotlightDef } from '../v2/types';
 import { crusherPoseAt, spotlightStateAt } from './stage-mechanics';
+import { segmentRoleLabel } from '../v14/progression';
 
 function rr(c:CanvasRenderingContext2D,x:number,y:number,w:number,h:number,r:number):void{c.beginPath();c.roundRect(x,y,w,h,r);}
 function gear(c:CanvasRenderingContext2D,x:number,y:number,r:number,teeth:number,angle:number,art:ChapterArt,fill=art.accent):void{
@@ -41,8 +42,8 @@ export function drawSpotlight(c:CanvasRenderingContext2D,def:SpotlightDef,art:Ch
   c.globalAlpha=1;string(c,cx-6,0,cx-6,lampY,art);c.translate(cx,lampY);c.rotate(Math.sin(time*.7+def.x)*.055);c.fillStyle=shade(art.platformDark,-.12);c.strokeStyle=art.ink;c.lineWidth=4;rr(c,-34,-18,68,36,8);c.fill();c.stroke();c.fillStyle=state.active?art.glow:state.warning?art.hazard:shade(art.paperShadow,-.2);c.beginPath();c.ellipse(0,19,25,10,0,0,Math.PI*2);c.fill();c.stroke();c.fillStyle=art.paper;c.font='900 8px monospace';c.textAlign='center';c.fillText(state.active?'FREEZE':state.warning?'READY':'SLEEP',0,3);c.restore();
 }
 
-export function drawBeatMarker(c:CanvasRenderingContext2D,beat:BeatDefinition,index:number,completed:boolean,gold:boolean,art:ChapterArt,time:number):void{
-  c.save();c.globalAlpha=completed ? .34 : .68;c.strokeStyle=completed?(gold?art.accent:art.secondary):shade(art.paper,.1);c.lineWidth=2;c.setLineDash([8,10]);c.beginPath();c.moveTo(beat.x,118);c.lineTo(beat.x,655);c.stroke();c.setLineDash([]);c.translate(beat.x,123);c.rotate(completed?-.04:.04*Math.sin(time*2+index));c.fillStyle=completed?(gold?art.accent:art.secondary):art.paper;c.strokeStyle=art.ink;c.lineWidth=3;rr(c,-50,-18,100,36,4);c.fill();c.stroke();c.fillStyle=art.ink;c.font='900 10px monospace';c.textAlign='center';c.fillText(completed?(gold?'GOLD TAKE':'TAKE OK'):`ACT ${index+1}`,0,-1);c.font='700 8px "PingFang SC",sans-serif';c.fillText(beat.label.slice(0,7),0,11);c.restore();
+export function drawBeatMarker(c:CanvasRenderingContext2D,beat:BeatDefinition,index:number,completed:boolean,art:ChapterArt,time:number):void{
+  c.save();c.globalAlpha=completed ? .32 : .76;c.strokeStyle=completed?art.secondary:shade(art.paper,.1);c.lineWidth=2;c.setLineDash([8,10]);c.beginPath();c.moveTo(beat.x,118);c.lineTo(beat.x,655);c.stroke();c.setLineDash([]);c.translate(beat.x,123);c.rotate(completed?-.04:.04*Math.sin(time*2+index));c.fillStyle=completed?art.secondary:art.paper;c.strokeStyle=art.ink;c.lineWidth=3;rr(c,-58,-21,116,42,5);c.fill();c.stroke();c.fillStyle=art.ink;c.font='900 10px "PingFang SC",sans-serif';c.textAlign='center';c.fillText(completed?'已通过':`第 ${index+1} 段 · ${segmentRoleLabel(beat.role)}`,0,-3);c.font='700 8px "PingFang SC",sans-serif';c.fillText(beat.label.slice(0,9),0,12);c.restore();
 }
 
 export function drawLandmark(c:CanvasRenderingContext2D,id:LandmarkId|undefined,worldWidth:number,art:ChapterArt,time:number):void{

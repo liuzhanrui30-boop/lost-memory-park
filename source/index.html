@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#17122c" />
   <meta name="description" content="原创非像素 I Wanna 式横版挑战游戏《失忆乐园》" />
-  <title>失忆乐园 · 跑跳剧场版</title>
+  <title>失忆乐园 · 递进闯关版</title>
 </head>
 <body>
   <div id="app">
@@ -16,8 +16,8 @@
     <div id="hud" class="hidden">
       <div class="hud-cluster hud-route">
         <div class="chip room-chip"><span>房间</span><b id="room-number">01 / 30</b></div>
-        <div class="chip map-chip"><span>舞台进度</span><i><em id="map-progress"></em></i></div>
-        <div class="chip take-chip"><span>四幕演出</span><b id="beat-stamps">○○○○</b></div>
+        <div class="chip map-chip"><span>本关进度</span><i><em id="map-progress"></em></i></div>
+        <div class="chip take-chip"><span>本关阶段</span><b id="beat-stamps">1 / 4</b></div>
       </div>
       <div class="hud-cluster hud-abilities">
         <div class="chip ability-chip"><span>双跳</span><b id="jumps">●●</b></div>
@@ -30,18 +30,17 @@
       </div>
       <div class="hud-secondary">
         <div id="director-command" class="chip director-chip">导演：标准演出</div>
-        <div id="contract-chip" class="chip contract-chip"><span>导演悬赏</span><b id="contract-state">待命</b><small id="contract-seals">0 / 24</small></div>
-        <div id="combo-chip" class="chip combo-chip"><span>险过连拍</span><b id="combo-value">×0</b></div>
-        <div class="chip heat-chip"><span>舞台热度</span><b id="heat-value">0</b><i><em id="heat-bar"></em></i></div>
+        <div id="segment-chip" class="chip segment-chip"><span>当前目标</span><b id="segment-goal">学习 · 观察机关</b></div>
+        <div id="contract-chip" class="chip contract-chip"><span>额外挑战</span><b id="contract-state">待命</b><small id="contract-seals">0 / 24</small></div>
       </div>
     </div>
 
     <section id="title-screen" class="screen visible title-screen">
       <div class="title-card">
         <div class="title-emblem" aria-hidden="true"><i></i><b>ADMIT ONE</b><i></i></div>
-        <p class="eyebrow">友好陷阱版 · v12.5</p>
+        <p class="eyebrow">递进闯关版 · v12.6</p>
         <h1>失忆乐园</h1>
-        <p class="tagline">只保留移动、双跳、下穿与重开，把难度集中到读招、走位和明确的落点。坑会更多，但不再靠别扭操作卡住玩家。</p>
+        <p class="tagline">每章六关按入门、练习、组合、变化、考核、终局递进；每关再分学习、练习、考验、终点四段。难度来自清晰组合，而不是无逻辑堆叠。</p>
         <div class="menu">
           <button id="new-game" class="primary">开始新游戏</button>
           <button id="continue-game">暂无存档</button>
@@ -62,7 +61,7 @@
     <section id="pause-screen" class="screen hidden shade">
       <div class="panel"><p class="eyebrow">挑战暂停</p><h2>喘口气</h2>
         <button id="resume-game" class="primary">继续挑战</button>
-        <p id="pause-objective" class="pause-objective">目标：穿过完整舞台抵达后台门。Boss 每阶段必须先躲过规定攻势，再依次关闭机关。</p>
+        <p id="pause-objective" class="pause-objective">目标：依次完成本关四段并抵达出口。Boss 每阶段必须先躲过规定攻势，再依次关闭机关。</p>
         <div class="director-note"><b id="director-title">导演指令 · 标准演出</b><span id="director-copy">本房间使用原始舞台规则。</span></div>
         <button id="restart-room">返回检查点 / 重开房间</button>
         <button id="pause-settings">完整设置</button>
@@ -84,7 +83,6 @@
         <label><span>粒子数量</span><input id="particle-count" type="range" min="0" max="1.5" step=".25" /></label>
         <label><span>动态背景</span><input id="dynamic-background" type="checkbox" /></label>
         <label><span>显示最佳路线残影</span><input id="show-ghost" type="checkbox" /></label>
-        <label><span>显示舞台热度</span><input id="heat-hud" type="checkbox" /></label>
         <label><span>减少动态效果</span><input id="reduced-motion" type="checkbox" /></label>
         <label><span>高对比危险物</span><input id="high-contrast" type="checkbox" /></label>
         <label><span>色觉友好标记</span><input id="color-friendly" type="checkbox" /></label>
@@ -115,12 +113,12 @@
     <section id="chapters-screen" class="screen hidden shade"><div class="panel"><p class="eyebrow">章节选择</p><h2>已走过的舞台</h2><div id="chapter-list"></div><button id="close-chapters">返回</button></div></section>
     <section id="modes-screen" class="screen hidden shade"><div class="panel"><p class="eyebrow">通关后舞台</p><h2>换一种方式重来</h2><p class="panel-copy">Boss Rush 连战四位舞台主人；镜像模式翻转画面与方向；导演失控会为每个房间稳定抽取一种疯狂规则。均需先完成任一结局。</p><button id="start-director" class="director-mode">导演失控 · 五种指令轮换</button><button id="start-bossrush">Boss Rush</button><button id="start-mirror">镜像模式</button><button id="close-modes">返回</button></div></section>
     <section id="archive-screen" class="screen hidden shade"><div class="panel archive-panel"><p class="eyebrow">广播与记忆</p><h2>记忆档案</h2><div id="archive-list"></div><button id="close-archive">返回</button></div></section>
-    <section id="credits-screen" class="screen hidden shade"><div class="panel credits-panel"><p class="eyebrow">制作信息</p><h2>失忆乐园</h2><div class="credits-copy"><p><b>友好陷阱版 · v12.5</b></p><p>原创非像素 Canvas 高难平台游戏。程序、美术、宽地图、关卡、文字与 WebAudio 全部内嵌，无外链资源。</p><p><b>双端控制</b><br>电脑保持高清键盘、手柄体验；手机横屏会自动显示安全区触控按钮，支持多点触控、方向滑动换向、触觉反馈，并可调整方向键大小、跳跃键大小、透明度、底部距离和左右手布局。手机采用仍高于实际屏幕显示需求的 1280×720 内部画布以稳定帧率，桌面保持 1600×900 至 1920×1080。</p><p><b>操作</b><br>A/D 或方向键移动；W/空格/Z 双跳；S/下方向键穿过薄板；R 返回检查点；右键只删除点中的残影；退格清除全部残影；Esc 暂停。</p></div><button id="close-credits">返回</button></div></section>
+    <section id="credits-screen" class="screen hidden shade"><div class="panel credits-panel"><p class="eyebrow">制作信息</p><h2>失忆乐园</h2><div class="credits-copy"><p><b>递进闯关版 · v12.6</b></p><p>原创非像素 Canvas 高难平台游戏。程序、美术、宽地图、关卡、文字与 WebAudio 全部内嵌，无外链资源。</p><p><b>关卡结构</b><br>每章六关循序增加机关数量、组合层数与远程威胁；关内四段明确标注学习、练习、考验与终点。已移除没有明确回报的热度和连拍系统。</p><p><b>双端控制</b><br>电脑保持高清键盘、手柄体验；手机横屏会自动显示安全区触控按钮，支持多点触控、方向滑动换向、触觉反馈，并可调整方向键大小、跳跃键大小、透明度、底部距离和左右手布局。</p><p><b>操作</b><br>A/D 或方向键移动；W/空格/Z 双跳；S/下方向键穿过薄板；R 返回检查点；右键只删除点中的残影；退格清除全部残影；Esc 暂停。</p></div><button id="close-credits">返回</button></div></section>
     <section id="memory-flash" class="memory-flash hidden"><div><small id="memory-title"></small><p id="memory-text"></p><span>空格 / 点击跳过</span></div></section>
 
     <div id="room-card" class="room-card hidden"><small id="chapter-label">第 1 章</small><h2 id="room-title"></h2><p id="room-hint"></p></div>
     <div id="toast" class="toast hidden"></div>
-    <div id="beat-flash" class="beat-flash hidden"><small>ACT CLEAR</small><strong id="beat-flash-label"></strong><span id="beat-flash-rank"></span></div>
+    <div id="beat-flash" class="beat-flash hidden"><small>阶段完成</small><strong id="beat-flash-label"></strong><span id="beat-flash-rank"></span></div>
     <div id="death-flash" class="death-flash"></div>
     <div id="touch-controls" class="touch-controls hidden" aria-label="手机触控操作">
       <button class="touch-pause" data-action="pause" aria-label="暂停"><span>Ⅱ</span></button>

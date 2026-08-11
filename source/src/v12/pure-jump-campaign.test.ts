@@ -27,11 +27,11 @@ describe('v12 pure jump four-act campaign',()=>{
     expect(encoreBlocks(1).some(block=>block.kind==='sticky')).toBe(true);
     expect(encoreBlocks(1).some(block=>block.kind==='crumble')).toBe(true);
     expect(encoreBlocks(2).some(block=>block.kind==='bounce')).toBe(true);
-    expect(normal.filter(room=>room.chapter===2).every(room=>room.spotlights?.some(light=>light.id.includes('-encore-')))).toBe(true);
+    expect(normal.filter(room=>room.chapter===2&&room.lesson!.step>=5).every(room=>room.spotlights?.some(light=>light.id.includes('-encore-')))).toBe(true);
     expect(encoreBlocks(3).some(block=>block.kind==='phase')).toBe(true);
-    expect(normal.filter(room=>room.chapter===3).every(room=>room.spikes.some(spike=>spike.id.includes('-encore-orbit-blade')))).toBe(true);
+    expect(normal.filter(room=>room.chapter===3&&room.lesson!.step>=5).every(room=>room.spikes.some(spike=>spike.id.includes('-encore-orbit-blade')))).toBe(true);
     expect(encoreBlocks(4).some(block=>block.kind==='conveyor')).toBe(true);
-    expect(normal.filter(room=>room.chapter===4).every(room=>room.lasers?.some(laser=>laser.id.includes('-encore-core-line')))).toBe(true);
+    expect(normal.filter(room=>room.chapter===4&&room.lesson!.step>=5).every(room=>room.lasers?.some(laser=>laser.id.includes('-encore-core-line')))).toBe(true);
   });
 
   it('keeps the expanded campaign data-valid',()=>expect(validateRooms()).toEqual([]));

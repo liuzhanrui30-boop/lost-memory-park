@@ -1,11 +1,9 @@
-import type { ContractDefinition, Rect } from '../v2/types';
+import type { ContractDefinition } from '../v2/types';
 
 export interface ContractMetrics {
   failed:boolean;
   elapsed:number;
   deaths:number;
-  maxHeat:number;
-  maxCombo:number;
 }
 
 const clamp=(value:number,min:number,max:number)=>Math.max(min,Math.min(max,value));
@@ -32,19 +30,5 @@ export function contractSuccess(contract:ContractDefinition|undefined,metrics:Co
   const target=contract.target??0;
   if(contract.rule==='no-death')return metrics.deaths===0;
   if(contract.rule==='speed')return metrics.elapsed<=target;
-  if(contract.rule==='heat')return metrics.maxHeat>=target;
-  if(contract.rule==='combo')return metrics.maxCombo>=target;
   return true;
-}
-
-export function comboTier(combo:number):0|1|2|3|4{
-  if(combo>=20)return 4;if(combo>=12)return 3;if(combo>=7)return 2;if(combo>=3)return 1;return 0;
-}
-
-export function expanded(rect:Rect,margin:number):Rect{return{x:rect.x-margin,y:rect.y-margin,w:rect.w+margin*2,h:rect.h+margin*2};}
-const intersects=(a:Rect,b:Rect)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
-
-/** A near miss is close enough to read as danger, but never overlaps the real damage box. */
-export function isNearMiss(player:Rect,hazard:Rect,margin=20):boolean{
-  return !intersects(player,hazard)&&intersects(player,expanded(hazard,margin));
 }

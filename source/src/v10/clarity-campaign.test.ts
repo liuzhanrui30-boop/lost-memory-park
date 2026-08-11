@@ -14,7 +14,7 @@ describe('v10 clear high-pressure campaign',()=>{
     for(let chapter=1;chapter<=4;chapter++){
       const chapterRooms=normal.filter(room=>room.chapter===chapter),themes=new Set(chapterRooms.map(room=>room.attackTheme)),patterns=new Set(chapterRooms.flatMap(room=>(room.sentries??[]).map(sentry=>sentry.pattern)));
       expect(themes).toEqual(new Set([CHAPTER_ATTACK_THEMES[chapter]]));expect(patterns.size).toBe(2);
-      expect(chapterRooms.every(room=>room.sentries?.length===2)).toBe(true);
+      expect(chapterRooms.map(room=>room.sentries?.length??0)).toEqual([0,1,1,1,2,2]);
     }
   });
 

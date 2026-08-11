@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import {
-  beatReward,
   crumbleStateAt,
   crusherPoseAt,
   crusherSafeWindow,
@@ -41,11 +40,5 @@ describe('v6 directed stage mechanics', () => {
     expect(crumbleStateAt(1,1.2,.38,1.8)).toBe('warning');
     expect(crumbleStateAt(1,1.6,.38,1.8)).toBe('absent');
     expect(crumbleStateAt(1,3.3,.38,1.8)).toBe('restored');
-  });
-
-  it('turns high-tempo beats into a useful but bounded combo reward', () => {
-    expect(beatReward(59)).toEqual({gold:false,comboBonus:0});
-    expect(beatReward(60)).toEqual({gold:true,comboBonus:2});
-    expect(beatReward(100)).toEqual({gold:true,comboBonus:2});
   });
 });

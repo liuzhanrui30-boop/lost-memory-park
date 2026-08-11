@@ -16,6 +16,7 @@ import type {
   WindZoneDef,
 } from '../v2/types';
 import { requirementLabel } from '../v9/action-locks';
+import { lessonPressure, lessonTier } from '../v14/progression';
 
 const WIDTH=3440;
 const clamp=(value:number,min:number,max:number)=>Math.max(min,Math.min(max,value));
@@ -24,30 +25,30 @@ const floor=(id:string,x:number,w:number,kind:BlockDef['kind']='solid',extra:Par
 const spike=(id:string,x:number,y=626,direction:SpikeDef['direction']='up',extra:Partial<SpikeDef>={}):SpikeDef=>({id,x,y,w:34,h:34,direction,...extra});
 
 export const HARD_CONTRACTS:readonly ContractDefinition[]=[
-  {id:'contract-01',label:'一镜到底',description:'不死亡抵达后台；奖励一枚导演封印。',rule:'no-death'},
-  {id:'contract-02',label:'糖针无伤',description:'不死亡穿过整段糖针射界。',rule:'no-death'},
-  {id:'contract-03',label:'保持躁动',description:'不要在地面停留超过两秒。',rule:'relentless'},
-  {id:'contract-04',label:'热场演员',description:'最高舞台热度达到 68。',rule:'heat',target:68},
-  {id:'contract-05',label:'十二连拍',description:'在同一次尝试中打出 12 连击。',rule:'combo',target:12},
-  {id:'contract-06',label:'礼盒连拍',description:'在移动礼盒之间打出 10 连击。',rule:'combo',target:10},
-  {id:'contract-07',label:'极速谢幕',description:'75 秒内抵达后台。',rule:'speed',target:75},
-  {id:'contract-08',label:'聚光独舞',description:'不死亡完成整场表演。',rule:'no-death'},
-  {id:'contract-09',label:'幕布追演',description:'不要在地面停留超过两秒。',rule:'relentless'},
-  {id:'contract-10',label:'高热返场',description:'最高舞台热度达到 74。',rule:'heat',target:74},
-  {id:'contract-11',label:'十四连拍',description:'在机关之间维持 14 连击。',rule:'combo',target:14},
-  {id:'contract-12',label:'别让灯等你',description:'地面静止超过两秒即违约。',rule:'relentless'},
-  {id:'contract-13',label:'镜中无悔',description:'不死亡完成镜面路线。',rule:'no-death'},
-  {id:'contract-14',label:'倒影躁动',description:'不要在镜面地板上停留超过两秒。',rule:'relentless'},
-  {id:'contract-15',label:'镜厅速写',description:'72 秒内通过全部三幕。',rule:'speed',target:72},
-  {id:'contract-16',label:'无伤真相',description:'不死亡抵达真正出口。',rule:'no-death'},
-  {id:'contract-17',label:'十六连拍',description:'打出 16 连击证明你不是倒影。',rule:'combo',target:16},
-  {id:'contract-18',label:'失真高烧',description:'最高舞台热度达到 78。',rule:'heat',target:78},
-  {id:'contract-19',label:'核心不停机',description:'地面静止超过两秒即违约。',rule:'relentless'},
-  {id:'contract-20',label:'核心热启动',description:'最高舞台热度达到 76。',rule:'heat',target:76},
-  {id:'contract-21',label:'城墙闪切',description:'68 秒内冲过坍塌城墙。',rule:'speed',target:68},
-  {id:'contract-22',label:'导演高烧',description:'最高舞台热度达到 82。',rule:'heat',target:82},
-  {id:'contract-23',label:'二十连拍',description:'在最终机关中打出 20 连击。',rule:'combo',target:20},
-  {id:'contract-24',label:'完美谢幕',description:'不死亡、不被园长打断地抵达后台。',rule:'no-death'},
+  {id:'contract-01',label:'第一次无伤',description:'不死亡抵达出口。失败不阻挡通关。',rule:'no-death'},
+  {id:'contract-02',label:'熟练通过',description:'85 秒内抵达出口。',rule:'speed',target:85},
+  {id:'contract-03',label:'不要犹豫',description:'不要在地面停留超过两秒。',rule:'relentless'},
+  {id:'contract-04',label:'变化无伤',description:'不死亡通过全部变化机关。',rule:'no-death'},
+  {id:'contract-05',label:'考核计时',description:'78 秒内完成本关。',rule:'speed',target:78},
+  {id:'contract-06',label:'糖果终考',description:'不死亡完成本章最后一关。',rule:'no-death'},
+  {id:'contract-07',label:'马戏无伤',description:'不死亡通过弹跳与炮火。',rule:'no-death'},
+  {id:'contract-08',label:'空中熟练',description:'82 秒内抵达出口。',rule:'speed',target:82},
+  {id:'contract-09',label:'保持移动',description:'不要在地面停留超过两秒。',rule:'relentless'},
+  {id:'contract-10',label:'聚光无伤',description:'不死亡穿过聚光灯区域。',rule:'no-death'},
+  {id:'contract-11',label:'马戏考核',description:'75 秒内完成本关。',rule:'speed',target:75},
+  {id:'contract-12',label:'马戏终考',description:'不死亡完成本章最后一关。',rule:'no-death'},
+  {id:'contract-13',label:'镜厅无伤',description:'不死亡通过第一段镜面路线。',rule:'no-death'},
+  {id:'contract-14',label:'倒影熟练',description:'80 秒内抵达出口。',rule:'speed',target:80},
+  {id:'contract-15',label:'不要停步',description:'不要在地面停留超过两秒。',rule:'relentless'},
+  {id:'contract-16',label:'真假无伤',description:'不死亡通过真假落点。',rule:'no-death'},
+  {id:'contract-17',label:'镜厅考核',description:'72 秒内完成本关。',rule:'speed',target:72},
+  {id:'contract-18',label:'镜厅终考',description:'不死亡完成本章最后一关。',rule:'no-death'},
+  {id:'contract-19',label:'城堡无伤',description:'不死亡通过第一段核心机关。',rule:'no-death'},
+  {id:'contract-20',label:'核心熟练',description:'76 秒内抵达出口。',rule:'speed',target:76},
+  {id:'contract-21',label:'不停机',description:'不要在地面停留超过两秒。',rule:'relentless'},
+  {id:'contract-22',label:'红线无伤',description:'不死亡穿过红线机关。',rule:'no-death'},
+  {id:'contract-23',label:'城堡考核',description:'68 秒内完成本关。',rule:'speed',target:68},
+  {id:'contract-24',label:'最终无伤',description:'不死亡完成最后一关。',rule:'no-death'},
 ] as const;
 
 export type ExecutionId='teeth'|'ceiling-thread'|'moving-needle'|'crossfire'|'orbit-cut'|'crumble-run'|'false-step'|'crusher-pair'|'spot-stutter'|'wind-thread'|'reverse-cannon';
@@ -65,12 +66,10 @@ export const EXECUTION_SCRIPTS:readonly ExecutionScript[]=[
 
 export interface LockScript {A:ButtonRequirement;B:ButtonRequirement}
 export const LOCK_SCRIPTS:readonly LockScript[]=[
-  {A:'momentum',B:'airborne'},{A:'reverse',B:'double-jump'},{A:'still',B:'rising'},{A:'combo',B:'falling'},
-  {A:'double-jump',B:'reverse'},{A:'airborne',B:'still'},{A:'falling',B:'combo'},{A:'reverse',B:'rising'},
-  {A:'still',B:'double-jump'},{A:'combo',B:'momentum'},{A:'airborne',B:'reverse'},{A:'double-jump',B:'falling'},
-  {A:'rising',B:'double-jump'},{A:'combo',B:'reverse'},{A:'still',B:'airborne'},{A:'reverse',B:'falling'},
-  {A:'double-jump',B:'combo'},{A:'airborne',B:'momentum'},{A:'still',B:'combo'},{A:'reverse',B:'double-jump'},
-  {A:'combo',B:'airborne'},{A:'falling',B:'still'},{A:'double-jump',B:'rising'},{A:'airborne',B:'combo'},
+  {A:'airborne',B:'rising'},{A:'double-jump',B:'falling'},{A:'momentum',B:'airborne'},{A:'reverse',B:'rising'},{A:'still',B:'double-jump'},{A:'momentum',B:'falling'},
+  {A:'airborne',B:'rising'},{A:'double-jump',B:'falling'},{A:'momentum',B:'airborne'},{A:'reverse',B:'rising'},{A:'still',B:'double-jump'},{A:'momentum',B:'falling'},
+  {A:'airborne',B:'rising'},{A:'double-jump',B:'falling'},{A:'momentum',B:'airborne'},{A:'reverse',B:'rising'},{A:'still',B:'double-jump'},{A:'momentum',B:'falling'},
+  {A:'airborne',B:'rising'},{A:'double-jump',B:'falling'},{A:'momentum',B:'airborne'},{A:'reverse',B:'rising'},{A:'still',B:'double-jump'},{A:'momentum',B:'falling'},
 ] as const;
 
 export type MechanicId='launcher'|'crumble'|'sticky'|'crusher'|'toggle'|'orbit'|'moving'|'wind'|'hidden'|'switch'|'fake'|'bounce'|'spotlight'|'laser'|'phase'|'ice'|'conveyor'|'applause'|'curtain';
@@ -161,10 +160,12 @@ function addSpikeRow(state:BuildState,prefix:string,x:number,y:number,count:numb
   for(let i=0;i<count;i++)state.spikes.push({id:`${prefix}-${i}`,x:x+i*30,y,w:30,h:30,direction});
 }
 
-function addOpeningExecution(state:BuildState,index:number,chapter:number):void{
-  const first=190+(index%4)*12,second=735+(index%3)*52;addSpikeRow(state,`v8-${index}-opening-fence-a`,first,630,3+(index%3));addSpikeRow(state,`v8-${index}-opening-fence-b`,second,630,2+((index+1)%3));
-  addSpikeRow(state,`v8-${index}-opening-ceiling`,first+112,510-(index%2)*38,2,'down');
-  if(chapter>=3)state.spikes.push({id:`v8-${index}-opening-sweeper`,x:535,y:560,w:32,h:32,direction:'right',moving:{axis:'y',distance:115,speed:2.15+chapter*.12}});
+function addOpeningExecution(state:BuildState,index:number,chapter:number,lessonStep:number):void{
+  const first=190+(index%4)*12,second=735+(index%3)*52;
+  if(lessonStep>=1)addSpikeRow(state,`v8-${index}-opening-fence-a`,first,630,3+(index%3));
+  if(lessonStep>=2)addSpikeRow(state,`v8-${index}-opening-fence-b`,second,630,2+((index+1)%3));
+  if(lessonStep>=3)addSpikeRow(state,`v8-${index}-opening-ceiling`,first+112,510-(index%2)*38,2,'down');
+  if(chapter>=3&&lessonStep>=4)state.spikes.push({id:`v8-${index}-opening-sweeper`,x:535,y:560,w:32,h:32,direction:'right',moving:{axis:'y',distance:115,speed:2.15+chapter*.12}});
 }
 
 function addExecution(state:BuildState,act:ActScaffold,execution:ExecutionId,chapter:number,variant:number):void{
@@ -202,7 +203,7 @@ const ENCORE_LABELS:Record<number,readonly string[]>={
   4:['核心返场','齿轮断桥','红线终拍','输送逆流','钟摆换位','园长谢幕'],
 };
 
-function addEncore(state:BuildState,index:number,chapter:number):{label:string;optional:OptionalCollectible}{
+function addEncore(state:BuildState,index:number,chapter:number,hazardLevel:0|1|2):{label:string;optional:OptionalCollectible}{
   const prefix=`v12-${index}-encore`,shift=index%2?10:0;
   state.blocks.push(floor(`${prefix}-rest`,2968,86),floor(`${prefix}-landing`,3370,70));
   addPit(state.spikes,prefix,3038,3370);
@@ -213,35 +214,35 @@ function addEncore(state:BuildState,index:number,chapter:number):{label:string;o
   state.blocks.push(p0,p1,p2,high);
 
   if(chapter===1){
-    p0.kind='crumble';p0.crumbleDelay=.34;p0.crumbleRespawn=1.65;p1.kind='sticky';p2.kind='moving';p2.toY=p2.y-132;p2.speed=1.42;
-    state.spikes.push({id:`${prefix}-tooth-a`,x:p1.x+5,y:p1.y-88,w:28,h:28,direction:'down'},{id:`${prefix}-tooth-b`,x:p1.x+p1.w-33,y:p1.y-88,w:28,h:28,direction:'down'});
+    p0.kind='crumble';p0.crumbleDelay=.42;p0.crumbleRespawn=1.75;
+    if(hazardLevel>=1)p1.kind='sticky';
+    if(hazardLevel>=2){p2.kind='moving';p2.toY=p2.y-132;p2.speed=1.42;state.spikes.push({id:`${prefix}-tooth-a`,x:p1.x+5,y:p1.y-88,w:28,h:28,direction:'down'},{id:`${prefix}-tooth-b`,x:p1.x+p1.w-33,y:p1.y-88,w:28,h:28,direction:'down'});}
   }else if(chapter===2){
-    p0.kind='bounce';p1.kind='moving';p1.toY=p1.y-118;p1.speed=1.52;p2.kind='bounce';
-    state.spotlights.push({id:`${prefix}-freeze-light`,x:3125,y:155,w:215,h:505,period:2.9,activeFor:.82,phase:.45+(index%3)*.24,warning:.58});
-    state.spikes.push({id:`${prefix}-knife`,x:3290,y:315,w:30,h:30,direction:'down',moving:{axis:'y',distance:92,speed:2.05}});
+    p0.kind='bounce';
+    if(hazardLevel>=1){p1.kind='moving';p1.toY=p1.y-118;p1.speed=1.52;}
+    if(hazardLevel>=2){p2.kind='bounce';state.spotlights.push({id:`${prefix}-freeze-light`,x:3125,y:155,w:215,h:505,period:2.9,activeFor:.82,phase:.45+(index%3)*.24,warning:.58});state.spikes.push({id:`${prefix}-knife`,x:3290,y:315,w:30,h:30,direction:'down',moving:{axis:'y',distance:92,speed:2.05}});}
   }else if(chapter===3){
     p0.kind='phase';p0.phasePeriod=2.8;p0.phaseActiveFor=2.05;p0.phaseOffset=0;
-    p1.kind='moving';p1.toY=p1.y-122;p1.speed=1.38;
-    p2.kind='phase';p2.phasePeriod=2.8;p2.phaseActiveFor=2.05;p2.phaseOffset=.92;
-    state.spikes.push({id:`${prefix}-orbit-blade`,x:high.x,y:high.y-65,w:30,h:30,direction:'down',orbit:{centerX:high.x+high.w/2,centerY:high.y-46,radiusX:70,radiusY:30,speed:index%2?-1.62:1.62,phase:index*.31}});
+    if(hazardLevel>=1){p1.kind='moving';p1.toY=p1.y-122;p1.speed=1.38;}
+    if(hazardLevel>=2){p2.kind='phase';p2.phasePeriod=2.8;p2.phaseActiveFor=2.05;p2.phaseOffset=.92;state.spikes.push({id:`${prefix}-orbit-blade`,x:high.x,y:high.y-65,w:30,h:30,direction:'down',orbit:{centerX:high.x+high.w/2,centerY:high.y-46,radiusX:70,radiusY:30,speed:index%2?-1.62:1.62,phase:index*.31}});}
   }else{
-    p0.kind='conveyor';p0.forceX=index%2?-145:145;p1.kind='moving';p1.toY=p1.y-135;p1.speed=1.6;p2.kind='crumble';p2.crumbleDelay=.3;p2.crumbleRespawn=1.58;
-    state.lasers.push({id:`${prefix}-core-line`,x:3238+shift,y:178,w:12,h:482,period:2.62,activeFor:.72,phase:.66+(index%3)*.21,direction:'vertical'});
-    state.spikes.push({id:`${prefix}-gear`,x:3120,y:470,w:32,h:32,direction:'right',moving:{axis:'y',distance:105,speed:2.22}});
+    p0.kind='conveyor';p0.forceX=index%2?-145:145;
+    if(hazardLevel>=1){p1.kind='moving';p1.toY=p1.y-135;p1.speed=1.6;}
+    if(hazardLevel>=2){p2.kind='crumble';p2.crumbleDelay=.3;p2.crumbleRespawn=1.58;state.lasers.push({id:`${prefix}-core-line`,x:3238+shift,y:178,w:12,h:482,period:2.62,activeFor:.72,phase:.66+(index%3)*.21,direction:'vertical'});state.spikes.push({id:`${prefix}-gear`,x:3120,y:470,w:32,h:32,direction:'right',moving:{axis:'y',distance:105,speed:2.22}});}
   }
 
   const label=ENCORE_LABELS[chapter][index%6];
   return{label,optional:{id:`note-encore-${index+1}`,x:high.x+30,y:high.y-38,w:28,h:34,title:`返场节目单 ${String(index+1).padStart(2,'0')}`,text:`${label}：位移特技已经停用。这里记录的只有助跑、起跳、空中修正和落点。`}};
 }
 
-function sentriesFor(index:number,chapter:number):SentryDef[]{
+function sentriesFor(index:number,chapter:number,count:0|1|2):SentryDef[]{
   const key=clamp(chapter,1,4) as 1|2|3|4;
   const patterns={1:['arc','aimed'],2:['fan','burst'],3:['mirror','aimed'],4:['burst','fan']} as const,labels={1:['糖豆抛射','糖针点射'],2:['飞刀扇射','马戏连炮'],3:['镜像双发','倒影狙击'],4:['齿轮连射','王冠散射']} as const,colors={1:['#d65365','#a93f55'],2:['#dca83f','#cf5b55'],3:['#45a99e','#b44763'],4:['#c64150','#df9f39']} as const;
   const periods={1:[2.72,2.48],2:[2.48,2.28],3:[2.34,2.16],4:[2.18,2.02]} as const,warnings={1:[.88,.76],2:[.78,.72],3:[.74,.68],4:[.7,.64]} as const;
   return[
     {id:`v10-sentry-${index}-a`,x:1080+(index%3)*62,y:175+(index%3)*70,range:760,period:periods[key][0],projectileSpeed:290+chapter*25,warning:warnings[key][0],phase:(index%4)*.31,pattern:patterns[key][0],label:labels[key][0],shotColor:colors[key][0]},
     {id:`v10-sentry-${index}-b`,x:2460+(index%2)*105,y:165+(index%3)*82,range:790,period:periods[key][1],projectileSpeed:310+chapter*28,warning:warnings[key][1],phase:.95+(index%3)*.27,pattern:patterns[key][1],label:labels[key][1],shotColor:colors[key][1]},
-  ];
+  ].slice(0,count);
 }
 
 function applyMechanic(state:BuildState,act:ActScaffold,mechanic:MechanicId,slot:number,chapter:number):void{
@@ -274,25 +275,26 @@ function applyMechanic(state:BuildState,act:ActScaffold,mechanic:MechanicId,slot
 }
 
 function directedRoom(room:RoomDef,index:number):RoomDef{
-  const recipe=ROOM_RECIPES[index],execution=EXECUTION_SCRIPTS[index],lockScript=LOCK_SCRIPTS[index],state:BuildState={blocks:structuredClone(room.blocks),spikes:structuredClone(room.spikes),buttons:structuredClone(room.buttons??[]),lasers:structuredClone(room.lasers??[]),launchers:[],crushers:[],spotlights:[],windZones:structuredClone(room.windZones??[]),traps:structuredClone(room.traps)};addOpeningExecution(state,index,room.chapter);
+  const lessonStep=index%6,pressure=lessonPressure(lessonStep),recipe=ROOM_RECIPES[index],execution=EXECUTION_SCRIPTS[index],lockScript=LOCK_SCRIPTS[index],state:BuildState={blocks:structuredClone(room.blocks),spikes:structuredClone(room.spikes),buttons:structuredClone(room.buttons??[]),lasers:structuredClone(room.lasers??[]),launchers:[],crushers:[],spotlights:[],windZones:structuredClone(room.windZones??[]),traps:structuredClone(room.traps)};addOpeningExecution(state,index,room.chapter,lessonStep);
   const exitBottom=clamp(room.exit.y+room.exit.h,210,600);for(let i=0;i<4;i++)state.blocks.push(block(`v6-${index}-bridge-${i}`,1200+i*100,clamp(exitBottom+i*78,210,600),120,'oneway'));
   state.blocks.push(floor(`v6-${index}-rest-a`,1490,128),floor(`v6-${index}-rest-b`,2200,118));
   const second=scaffold(state,`v6-${index}-second`,1640,2180,index),finale=scaffold(state,`v6-${index}-finale`,2330,2990,index+2);
-  recipe.secondAct.forEach((mechanic,slot)=>applyMechanic(state,second,mechanic,slot,room.chapter));recipe.finale.forEach((mechanic,slot)=>applyMechanic(state,finale,mechanic,slot+2,room.chapter));
-  dressAct(state,second,room.chapter,index);dressAct(state,finale,room.chapter,index+3);addExecution(state,second,execution.second,room.chapter,index);addExecution(state,finale,execution.finale,room.chapter,index+3);const recoveryA=addSkillLock(state,second,index,'A',lockScript.A),recoveryB=addSkillLock(state,finale,index,'B',lockScript.B);
+  recipe.secondAct.slice(0,pressure.secondMechanics).forEach((mechanic,slot)=>applyMechanic(state,second,mechanic,slot,room.chapter));recipe.finale.slice(0,pressure.finaleMechanics).forEach((mechanic,slot)=>applyMechanic(state,finale,mechanic,slot+2,room.chapter));
+  if(pressure.dressSecond)dressAct(state,second,room.chapter,index);if(pressure.dressFinale)dressAct(state,finale,room.chapter,index+3);if(pressure.executionSecond)addExecution(state,second,execution.second,room.chapter,index);if(pressure.executionFinale)addExecution(state,finale,execution.finale,room.chapter,index+3);const recoveryA=addSkillLock(state,second,index,'A',lockScript.A),recoveryB=addSkillLock(state,finale,index,'B',lockScript.B);
   const branchX=recipe.branchSide==='second'?1980:2745,branchY=300+(index%3)*35;state.blocks.push(block(`v6-${index}-branch-step`,branchX-145,branchY+105,112,'oneway'),block(`v6-${index}-branch`,branchX,branchY,118,'oneway'));
-  const encore=addEncore(state,index,room.chapter);
+  const encore=addEncore(state,index,room.chapter,pressure.encoreHazards);
   const optional:OptionalCollectible={id:`note-directed-${index+1}`,x:branchX+44,y:branchY-42,w:28,h:34,title:`导演手记 ${String(index+1).padStart(2,'0')}`,text:[...recipe.labels].join('。')+'。这不是随机事故，而是写进节目单的顺序。'};
-  const beats:BeatDefinition[]=[{x:1160,label:recipe.labels[0],intensity:.35},{x:2140,label:recipe.labels[1],intensity:.64,checkpoint:true},{x:2920,label:recipe.labels[2],intensity:.86,checkpoint:true},{x:3360,label:encore.label,intensity:1,checkpoint:true}];
+  const beats:BeatDefinition[]=[{x:1160,label:recipe.labels[0],intensity:.25,role:'learn'},{x:2140,label:recipe.labels[1],intensity:.5,role:'practice',checkpoint:true},{x:2920,label:recipe.labels[2],intensity:.78,role:'test',checkpoint:true},{x:3360,label:encore.label,intensity:.95,role:'finish',checkpoint:true}];
   const baseSpeed=[0,130,149,168,187][room.chapter],maxSpeed=[0,224,249,274,298][room.chapter];
   const pursuit=index%6===5?{id:`v10-pursuit-${index}`,startX:-115,triggerX:260,baseSpeed,maxSpeed,width:96}:undefined;
-  return{...structuredClone(room),worldWidth:WIDTH,worldHeight:720,exit:{...room.exit,x:WIDTH-58,y:566,w:42,h:94},blocks:state.blocks,spikes:state.spikes,traps:state.traps,buttons:state.buttons,lasers:state.lasers,launchers:state.launchers,portals:[],crushers:state.crushers,spotlights:state.spotlights,windZones:state.windZones,checkpoints:[...(room.checkpoints??(room.checkpoint?[room.checkpoint]:[])),{x:1482,y:600,w:34,h:60},checkpointOn(recoveryA),checkpointOn(recoveryB)],optional:[...(room.optional??[]),optional,encore.optional],beats,landmark:recipe.landmark,remixKind:`${requirementLabel(lockScript.A)}锁+${requirementLabel(lockScript.B)}锁→${recipe.secondAct.join('+')}→${recipe.finale.join('+')}→${encore.label}`,pursuit,sentries:sentriesFor(index,room.chapter),attackTheme:CHAPTER_ATTACK_THEMES[room.chapter],contract:HARD_CONTRACTS[index]};
+  const focus=`${recipe.labels[0]} → ${recipe.labels[1]} → ${recipe.labels[2]}`;
+  return{...structuredClone(room),worldWidth:WIDTH,worldHeight:720,exit:{...room.exit,x:WIDTH-58,y:566,w:42,h:94},blocks:state.blocks,spikes:state.spikes,traps:state.traps,buttons:state.buttons,lasers:state.lasers,launchers:state.launchers,portals:[],crushers:state.crushers,spotlights:state.spotlights,windZones:state.windZones,checkpoints:[...(room.checkpoints??(room.checkpoint?[room.checkpoint]:[])),{x:1482,y:600,w:34,h:60},checkpointOn(recoveryA),checkpointOn(recoveryB)],optional:[...(room.optional??[]),optional,encore.optional],beats,landmark:recipe.landmark,remixKind:focus,lesson:{step:lessonStep+1,total:6,tier:lessonTier(lessonStep),focus},pursuit,sentries:sentriesFor(index,room.chapter,pressure.sentries),attackTheme:CHAPTER_ATTACK_THEMES[room.chapter],contract:HARD_CONTRACTS[index]};
 }
 
 export function upgradePrologue(room:RoomDef):RoomDef{
   const blocks=[floor('opening-floor-a',0,640),block('opening-crumble-a',712,542,152,'crumble',{crumbleDelay:.5,crumbleRespawn:1.75}),block('opening-crumble-b',892,462,152,'crumble',{crumbleDelay:.48,crumbleRespawn:1.8}),block('opening-high-step',1072,400,142,'oneway'),block('opening-landing-step',1192,510,112,'oneway'),floor('opening-floor-b',1280,680)];
   const pit=[] as SpikeDef[];addPit(pit,'opening',640,1280);for(let i=0;i<3;i++)pit.push({id:`opening-mandatory-jump-${i}`,x:330+i*30,y:630,w:30,h:30,direction:'up'});
-  return{...structuredClone(room),name:'序章 · 先学会活着',hint:'先看指示牌熟悉 WASD；大炮和尖刺会依次教你移动、跳跃与二段跳。',message:'广播：先看牌子。今晚的第一场排练，不要求你立刻完美。',worldWidth:1960,exit:{x:1895,y:566,w:42,h:94},blocks,spikes:pit,traps:[],launchers:[{id:'opening-launcher',x:565,y:600,w:66,h:60,vx:565,vy:-710,facing:1}],portals:[],crushers:[{id:'opening-hand',x:1570,y:70,w:112,h:190,axis:'y',distance:385,period:3.2,phase:.35}],spotlights:[],windZones:[],lasers:[],buttons:[],checkpoints:[{x:1430,y:600,w:34,h:60}],beats:[{x:500,label:'按键排练',intensity:.12},{x:1120,label:'高台穿刺',intensity:.42},{x:1760,label:'逃离巨手',intensity:.72,checkpoint:true}],tutorialSigns:[{id:'wasd-guide',x:74,y:330,w:430,h:242,title:'新手指示牌',rows:[{keys:'A / D',label:'左右移动'},{keys:'W / 空格',label:'跳跃 · 再按一次二段跳'},{keys:'S / ↓',label:'向下穿过薄板'},{keys:'R',label:'回到最近检查点'},{keys:'右键 / 退格',label:'单删 / 全清死亡残影'}]}],landmark:'candy-press',pursuit:{id:'opening-pursuit',startX:-120,triggerX:540,baseSpeed:96,maxSpeed:174,width:92},sentries:[{id:'opening-sentry',x:1510,y:245,range:620,period:3.25,projectileSpeed:282,warning:1.05,phase:.4,pattern:'arc',label:'糖豆抛射',shotColor:'#d65365'}],attackTheme:'糖豆抛射',contract:{id:'opening-contract',label:'开场试镜',description:'45 秒内逃出序章。失败不阻挡通关。',rule:'speed',target:45}};
+  return{...structuredClone(room),name:'序章 · 先学会活着',hint:'先看指示牌熟悉 WASD；大炮和尖刺会依次教你移动、跳跃与二段跳。',message:'广播：先看牌子。第一关只教基本操作，不要求你立刻完美。',worldWidth:1960,exit:{x:1895,y:566,w:42,h:94},blocks,spikes:pit,traps:[],launchers:[{id:'opening-launcher',x:565,y:600,w:66,h:60,vx:565,vy:-710,facing:1}],portals:[],crushers:[{id:'opening-hand',x:1570,y:70,w:112,h:190,axis:'y',distance:385,period:3.2,phase:.35}],spotlights:[],windZones:[],lasers:[],buttons:[],checkpoints:[{x:1430,y:600,w:34,h:60}],beats:[{x:500,label:'基本移动',intensity:.12,role:'learn'},{x:1120,label:'二段跳',intensity:.42,role:'practice'},{x:1760,label:'综合躲避',intensity:.72,role:'finish',checkpoint:true}],tutorialSigns:[{id:'wasd-guide',x:74,y:330,w:430,h:242,title:'新手指示牌',rows:[{keys:'A / D',label:'左右移动'},{keys:'W / 空格',label:'跳跃 · 再按一次二段跳'},{keys:'S / ↓',label:'向下穿过薄板'},{keys:'R',label:'回到最近检查点'},{keys:'右键 / 退格',label:'单删 / 全清死亡残影'}]}],landmark:'candy-press',pursuit:{id:'opening-pursuit',startX:-120,triggerX:540,baseSpeed:96,maxSpeed:174,width:92},sentries:[{id:'opening-sentry',x:1510,y:245,range:620,period:3.25,projectileSpeed:282,warning:1.05,phase:.4,pattern:'arc',label:'糖豆抛射',shotColor:'#d65365'}],attackTheme:'糖豆抛射',contract:{id:'opening-contract',label:'开场试镜',description:'45 秒内逃出序章。失败不阻挡通关。',rule:'speed',target:45}};
 }
 
 function upgradeBoss(room:RoomDef):RoomDef{

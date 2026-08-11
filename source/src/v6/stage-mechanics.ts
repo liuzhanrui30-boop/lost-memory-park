@@ -37,5 +37,3 @@ export type CrumbleState='stable'|'warning'|'absent'|'restored';
 export function crumbleStateAt(touchedAt:number|null,time:number,delay=.38,respawn=1.8):CrumbleState{
   if(touchedAt===null)return'stable';const age=Math.max(0,time-touchedAt);if(age<delay)return'warning';if(age<delay+respawn)return'absent';return'restored';
 }
-
-export function beatReward(heat:number):{gold:boolean;comboBonus:number}{const gold=heat>=60;return{gold,comboBonus:gold?2:0};}

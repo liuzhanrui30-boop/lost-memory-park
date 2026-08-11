@@ -13,11 +13,12 @@ export interface LauncherDef extends Rect {id:string;vx:number;vy:number;facing?
 export interface PortalDef extends Rect {id:string;target:string;exitDirection:-1|1;color?:string}
 export interface CrusherDef extends Rect {id:string;axis:'x'|'y';distance:number;period:number;phase?:number}
 export interface SpotlightDef extends Rect {id:string;period:number;activeFor:number;phase?:number;warning?:number}
-export interface BeatDefinition {x:number;label:string;intensity:number;checkpoint?:boolean}
+export type SegmentRole='learn'|'practice'|'test'|'finish';
+export interface BeatDefinition {x:number;label:string;intensity:number;role:SegmentRole;checkpoint?:boolean}
 export interface PursuitDef {id:string;startX:number;triggerX:number;baseSpeed:number;maxSpeed:number;width?:number;color?:string}
 export type SentryPattern='aimed'|'arc'|'fan'|'mirror'|'burst';
 export interface SentryDef {id:string;x:number;y:number;range:number;period:number;projectileSpeed:number;warning:number;phase?:number;burst?:number;pattern?:SentryPattern;label?:string;shotColor?:string}
-export type ContractRule='relentless'|'no-death'|'speed'|'heat'|'combo';
+export type ContractRule='relentless'|'no-death'|'speed';
 export interface ContractDefinition {id:string;label:string;description:string;rule:ContractRule;target?:number}
 export type LandmarkId='candy-press'|'lollipop-gears'|'gift-jaw'|'cannon-stack'|'applause-eye'|'living-curtain'|'broken-mirror'|'twin-shadow'|'rotating-room'|'clock-hand'|'memory-furnace'|'choice-engine';
 
@@ -39,7 +40,7 @@ export interface BlockDef extends Rect {
   orbit?:OrbitPlatformSpec;
 }
 
-export type ButtonRequirement='touch'|'airborne'|'reverse'|'still'|'double-jump'|'combo'|'momentum'|'rising'|'falling';
+export type ButtonRequirement='touch'|'airborne'|'reverse'|'still'|'double-jump'|'momentum'|'rising'|'falling';
 export interface ButtonDef extends Rect {
   id: string;
   target: string;
@@ -127,6 +128,7 @@ export interface RoomDef {
   attackTheme?:string;
   contract?:ContractDefinition;
   tutorialSigns?:TutorialSignDef[];
+  lesson?:{step:number;total:number;tier:string;focus:string};
 }
 
 export interface AccessibilitySettings {
@@ -159,7 +161,6 @@ export interface AccessibilitySettings {
   colorFriendly: boolean;
   dialogueSpeed: number;
   showGhost:boolean;
-  heatHud:boolean;
   bindings: Record<'left'|'right'|'jump'|'drop'|'restart'|'pause', string>;
 }
 
@@ -169,7 +170,7 @@ export const defaultSettings = (): AccessibilitySettings => ({
   hudMode: 'full', textScale: 1, gameSpeed: 1, warningBoost: false,
   showHiddenTraps: false, gamepad: true, touch: false, touchMode: 'auto', touchScale: 1, touchJumpScale: 1.12, touchOpacity: .72, touchInset: 18,
   touchLeftHanded: false, haptics: true, colorFriendly: false, dialogueSpeed: 1,
-  showGhost: false, heatHud: true,
+  showGhost: false,
   bindings: { left:'KeyA', right:'KeyD', jump:'Space', drop:'KeyS', restart:'KeyR', pause:'Escape' },
 });
 

@@ -138,10 +138,6 @@ button.primary { color: #f5ead5; background: #a73e4a; }
 .map-chip { width:88px; position:relative; overflow:hidden; }
 .map-chip i { position:absolute; left:7px; right:7px; bottom:5px; height:5px; background:rgba(48,38,50,.18); border-radius:4px; }
 .map-chip em { display:block; width:0; height:100%; background:linear-gradient(90deg,#b85a67,#d8ae58,#60a08f); transition:width .12s linear; }
-.heat-chip { min-width:122px; position:relative; overflow:hidden; }
-.heat-chip i { position:absolute; left:6px; right:6px; bottom:3px; height:3px; background:rgba(48,38,50,.18); }
-.heat-chip em { display:block; width:0; height:100%; background:linear-gradient(90deg,#4f9b89,#e0ae4e,#c84551); transition:width .1s linear; }
-.heat-off .heat-chip { display:none; }
 .director-chip { color:#f7edd7; background:var(--director-color,#6d4a50); font:900 11px/1 monospace; align-items:center; max-width:190px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 #hud[data-mode="director"] .director-chip { animation:directorPulse 1.6s steps(2) infinite; }
 @keyframes directorPulse { 50% { transform:rotate(.65deg) translateY(2px); filter:saturate(1.35); } }
@@ -180,7 +176,6 @@ button.primary { color: #f5ead5; background: #a73e4a; }
   .chip.time { margin-left:0; }
   .room-card { left:8px; top:72px; width:min(360px,90vw); }
   .director-chip { max-width:125px; }
-  .heat-chip { min-width:70px; }
   .touch-action { gap:5px !important; }
   .touch-action button { width:58px; height:58px; }
   #ending-stats { grid-template-columns:1fr; }
@@ -194,7 +189,6 @@ button.primary { color: #f5ead5; background: #a73e4a; }
   .chip { padding:6px 8px; gap:4px; }
   .chip span { font-size:8px; }
   .director-chip { max-width:125px; }
-  .heat-chip { min-width:95px; }
   .map-chip { width:70px; }
 }
 
@@ -248,12 +242,9 @@ button.primary { color: #f5ead5; background: #a73e4a; }
 .contract-chip[data-state="failed"] { color:#f7e7d2; background:linear-gradient(135deg,#8c3648,#5e2739); }
 .contract-chip[data-state="failed"] small { color:#f1c3ba; }
 .contract-chip[data-state="cleared"] { background:linear-gradient(135deg,#cde4c8,#65a48b); box-shadow:3px 3px 0 rgba(29,73,61,.8),0 0 18px rgba(105,198,161,.28); }
-.chip.combo-chip { min-width:86px; justify-content:center; background:linear-gradient(135deg,#e8d6bc,#cfa66b); transition:filter .12s,transform .12s; }
-.combo-chip b { color:#943b4d; font-size:18px; }
-.combo-chip[data-tier="2"],.combo-chip[data-tier="3"],.combo-chip[data-tier="4"] { filter:saturate(1.35) drop-shadow(0 0 7px rgba(239,182,73,.45)); }
-.combo-chip.near { animation:nearChip .34s steps(2); }
-@keyframes nearChip { 50% { transform:translateY(4px) rotate(1deg) scale(1.08); background:#fff0ad; } }
-@media (max-width:900px) { .contract-chip { min-width:112px; padding-right:8px; } .contract-chip span,.contract-chip small { display:none; } .combo-chip { min-width:48px; } }
+.chip.segment-chip { min-width:220px; justify-content:center; background:linear-gradient(135deg,#d9e5d5,#8fbea8); }
+.segment-chip b { max-width:155px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11px; color:#294b43; }
+@media (max-width:900px) { .contract-chip { min-width:112px; padding-right:8px; } .contract-chip span,.contract-chip small { display:none; } .segment-chip { min-width:130px; } .segment-chip span { display:none; } }
 
 /* ── Paper Theatre Art Remaster v5.1 ─────────────────────────────── */
 :root {
@@ -343,13 +334,9 @@ button.primary { color:#fff2d5; background:linear-gradient(#bd4d59,#963342); }
 .time { min-width:96px; justify-content:center; }
 .hud-secondary { position:absolute; left:50%; top:43px; transform:translateX(-50%); display:flex; align-items:center; gap:5px; }
 .director-chip { max-width:230px; min-height:25px; padding:5px 13px; color:#fff0d2; border-color:#211923; background:var(--director-color,#6d4a50); clip-path:polygon(7px 0,calc(100% - 7px) 0,100% 50%,calc(100% - 7px) 100%,7px 100%,0 50%); box-shadow:none; }
-.heat-chip { min-width:120px; min-height:25px; padding:5px 10px 8px; }
-.heat-chip span { font-size:8px; }
-.heat-chip i { bottom:3px; height:3px; }
 .hud-compact .chip span { display:none; }
 .hud-compact .echo-chip,.hud-compact .map-chip { display:none; }
 .hud-compact .ability-chip { min-width:37px; }
-.heat-off .heat-chip { display:none; }
 
 .room-card {
   left:24px; top:88px; width:342px; padding:15px 18px 16px 22px;

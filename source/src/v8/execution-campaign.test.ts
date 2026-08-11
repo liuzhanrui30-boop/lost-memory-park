@@ -10,17 +10,21 @@ describe('v8 no-hold-forward execution campaign',()=>{
     expect(new Set(EXECUTION_SCRIPTS.map(script=>`${script.second}/${script.finale}`)).size).toBeGreaterThanOrEqual(20);
   });
 
-  it('uses all eight pure run-and-jump skills across authored director locks',()=>{
+  it('uses only seven visible run-and-jump skills across authored locks',()=>{
     expect(LOCK_SCRIPTS).toHaveLength(24);
-    expect(new Set(LOCK_SCRIPTS.flatMap(script=>[script.A,script.B]))).toEqual(new Set(['airborne','reverse','still','double-jump','combo','momentum','rising','falling']));
+    expect(new Set(LOCK_SCRIPTS.flatMap(script=>[script.A,script.B]))).toEqual(new Set(['airborne','reverse','still','double-jump','momentum','rising','falling']));
   });
 
-  it('kills a grounded right-only route before it can become the golden path',()=>{
-    for(const room of normal){
+  it('adds opening execution only after the chapter introduction',()=>{
+    for(let chapter=1;chapter<=4;chapter++){
+      const chapterRooms=normal.filter(room=>room.chapter===chapter);
+      expect(chapterRooms[0].spikes.filter(spike=>spike.id.includes('-opening-fence-a-'))).toHaveLength(0);
+      for(const room of chapterRooms.slice(1)){
       const opening=room.spikes.filter(spike=>spike.id.includes('-opening-fence-a-'));
       expect(opening.length).toBeGreaterThanOrEqual(3);
       expect(Math.min(...opening.map(spike=>spike.x))).toBeLessThan(240);
       expect(opening.every(spike=>spike.y+spike.h>=660)).toBe(true);
+      }
     }
   });
 
@@ -29,7 +33,7 @@ describe('v8 no-hold-forward execution campaign',()=>{
       const gates=room.blocks.filter(block=>block.id.includes('-lock-'));
       const switches=(room.buttons??[]).filter(button=>button.id.includes('-lock-'));
       expect(gates).toHaveLength(2);expect(switches).toHaveLength(2);
-      for(const gate of gates){const button=switches.find(item=>item.target===gate.id);expect(button).toBeTruthy();expect(button!.x).toBeLessThan(gate.x);expect(button!.requires).not.toBe('touch');const support=room.blocks.find(block=>Math.abs(block.y-(button!.y+button!.h))<.1&&block.x<button!.x+button!.w&&block.x+block.w>button!.x);expect(support).toBeTruthy();expect(['solid','oneway','ice','sticky','conveyor',undefined]).toContain(support!.kind);}
+      for(const gate of gates){const button=switches.find(item=>item.target===gate.id);expect(button).toBeTruthy();expect(button!.x).toBeLessThan(gate.x);expect(button!.requires).not.toBe('touch');const support=room.blocks.find(block=>Math.abs(block.y-(button!.y+button!.h))<.1&&block.x<button!.x+button!.w&&block.x+block.w>button!.x);expect(support).toBeTruthy();expect(['solid','oneway','ice','sticky','conveyor','crumble',undefined]).toContain(support!.kind);}
       const secondGate=gates.find(gate=>gate.id.endsWith('-A'))!;expect(room.checkpoints?.some(cp=>cp.x>secondGate.x)).toBe(true);
     }
   });

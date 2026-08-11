@@ -122,11 +122,9 @@ export class AudioSystem {
   crusher():void{if(this.sfxEnabled){this.tone(52,.24,'sawtooth',.16,-90);this.tone(84,.12,'square',.11,-35);setTimeout(()=>this.tone(43,.26,'triangle',.09,-70),42);}}
   spotlightLock():void{if(this.sfxEnabled){this.tone(1220,.055,'square',.08);setTimeout(()=>this.tone(305,.14,'sawtooth',.11,-60),48);}}
   toggle():void{if(this.sfxEnabled){this.tone(245,.08,'square',.08);setTimeout(()=>this.tone(490,.12,'triangle',.09),72);}}
-  beatStamp(gold:boolean):void{if(this.sfxEnabled){const notes=gold?[523,784,1047]:[330,440,587];notes.forEach((n,i)=>setTimeout(()=>this.tone(n,.14,'triangle',gold ? .105 : .075,i*5),i*46));if(gold)setTimeout(()=>this.tone(1319,.24,'sine',.08),140);}}
+  segmentComplete():void{if(this.sfxEnabled){[330,440,587].forEach((n,i)=>setTimeout(()=>this.tone(n,.14,'triangle',.075,i*5),i*46));}}
   pursuit():void{if(this.sfxEnabled){this.tone(58,.28,'sawtooth',.11,-70);setTimeout(()=>this.tone(116,.18,'square',.06,-35),75);}}
   sentry():void{if(this.sfxEnabled){this.tone(980,.045,'square',.055);setTimeout(()=>this.tone(1320,.055,'square',.045),70);}}
-  nearMiss():void{if(this.sfxEnabled){this.tone(720,.055,'triangle',.06);setTimeout(()=>this.tone(1080,.09,'sine',.075),34);}}
-  combo(tier:number):void{if(this.sfxEnabled){const root=420+tier*95;[root,root*1.25].forEach((n,i)=>setTimeout(()=>this.tone(n,.08,'triangle',.05+tier*.008),i*35));}}
   contractClear():void{if(this.sfxEnabled)[392,523,659,988].forEach((n,i)=>setTimeout(()=>this.tone(n,.15,'triangle',.08+i*.008),i*56));}
   contractFail():void{if(this.sfxEnabled){this.tone(185,.13,'sawtooth',.075,-45);setTimeout(()=>this.tone(92,.2,'square',.07,-70),70);}}
 }

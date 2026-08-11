@@ -5,12 +5,13 @@ import { HARD_CONTRACTS } from '../v6/campaign';
 describe('v7 extreme performance campaign',()=>{
   const normal=rooms.filter(room=>room.kind==='normal');
 
-  it('gives every room ranged pressure while reserving pursuit walls for chapter climaxes',()=>{
+  it('introduces ranged pressure gradually while reserving pursuit walls for chapter climaxes',()=>{
     expect(normal).toHaveLength(24);expect(HARD_CONTRACTS).toHaveLength(24);
     expect(new Set(normal.map(room=>room.contract?.id)).size).toBe(24);
-    expect(new Set(normal.map(room=>room.contract?.rule)).size).toBe(5);
+    expect(new Set(normal.map(room=>room.contract?.rule))).toEqual(new Set(['no-death','speed','relentless']));
     expect(normal.filter(room=>room.pursuit)).toHaveLength(4);
-    for(const room of normal){expect(room.sentries).toHaveLength(2);expect(room.contract).toBeTruthy();}
+    for(let chapter=1;chapter<=4;chapter++){expect(normal.filter(room=>room.chapter===chapter).map(room=>room.sentries?.length??0)).toEqual([0,1,1,1,2,2]);}
+    for(const room of normal)expect(room.contract).toBeTruthy();
   });
 
   it('keeps precision sequences compact while widening required landings',()=>{
@@ -19,7 +20,7 @@ describe('v7 extreme performance campaign',()=>{
       expect(precision).toHaveLength(6);
       expect(Math.max(...precision.map(block=>block.w))).toBeLessThanOrEqual(104);
       expect(Math.min(...precision.map(block=>block.w))).toBeGreaterThanOrEqual(72);
-      expect(room.spikes.some(spike=>spike.id.includes('-edge-'))).toBe(true);
+      expect(room.lesson?.step===1||room.spikes.some(spike=>spike.id.includes('-edge-'))).toBe(true);
     }
   });
 
