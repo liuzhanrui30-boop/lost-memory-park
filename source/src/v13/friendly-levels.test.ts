@@ -1,5 +1,6 @@
 import { describe,expect,it } from 'vitest';
 import { rooms } from '../v2/rooms';
+import { buttonHazardConflicts } from '../v15/level-safety';
 
 describe('friendlier required route',()=>{
   it('places lock checkpoints on top of their recovery platforms',()=>{
@@ -15,5 +16,9 @@ describe('friendlier required route',()=>{
   it('teaches full WASD and selective echo removal in the prologue',()=>{
     const prologue=rooms[0],text=prologue.tutorialSigns?.flatMap(sign=>sign.rows.flatMap(row=>[row.keys,row.label])).join(' ')??'';
     expect(prologue.tutorialSigns).toHaveLength(1);expect(text).toContain('W');expect(text).toContain('S');expect(text).toContain('右键');
+  });
+
+  it('never places spikes, lasers or crushers inside an interaction button',()=>{
+    for(const room of rooms.filter(room=>room.kind==='normal'))expect(buttonHazardConflicts(room),room.id).toEqual([]);
   });
 });

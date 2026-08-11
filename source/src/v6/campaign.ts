@@ -17,6 +17,7 @@ import type {
 } from '../v2/types';
 import { requirementLabel } from '../v9/action-locks';
 import { lessonPressure, lessonTier } from '../v14/progression';
+import { buttonSafetyZone, crusherSweptBounds, rectsOverlap, spikeSweptBounds } from '../v15/level-safety';
 
 const WIDTH=3440;
 const clamp=(value:number,min:number,max:number)=>Math.max(min,Math.min(max,value));
@@ -139,19 +140,18 @@ function scaffold(state:BuildState,prefix:string,start:number,end:number,variant
 
 function dressAct(state:BuildState,act:ActScaffold,chapter:number,variant:number):void{
   const span=act.end-act.start;
-  for(const [i,p] of act.platforms.entries()){
-    if(p.w<62||(i+variant)%2!==0)continue;
-    const left=(i+variant)%4===0;state.spikes.push({id:`${act.prefix}-edge-${i}`,x:left?p.x:p.x+p.w-22,y:p.y-22,w:22,h:22,direction:'up'});
-  }
+  const finale=act.prefix.endsWith('finale'),edgeIndices=finale?[0,2]:[1];
+  for(const i of edgeIndices){const p=act.platforms[i];if(p.w<62)continue;state.spikes.push({id:`${act.prefix}-edge-${i}`,x:p.x+p.w-20,y:p.y-20,w:20,h:20,direction:'up'});}
+  const gap=(a:BlockDef,b:BlockDef)=>({x:(a.x+a.w+b.x)/2,y:Math.max(165,Math.min(a.y,b.y)-82)}),[p0,p1,p2]=act.platforms,gapA=gap(p0,p1),gapB=gap(p1,p2);
   if(chapter===1){
-    const [p0,,p2]=act.platforms;for(const [i,p] of [p0,p2].entries())state.spikes.push({id:`${act.prefix}-candy-tooth-${i}`,x:p.x+p.w/2-14,y:Math.max(165,p.y-104),w:28,h:28,direction:'down'});
+    for(const [i,point] of [gapA,gapB].entries())state.spikes.push({id:`${act.prefix}-candy-tooth-${i}`,x:point.x-14,y:point.y,w:28,h:28,direction:'down'});
   }else if(chapter===2){
-    for(const [i,p] of act.platforms.slice(1).entries())state.spikes.push({id:`${act.prefix}-circus-knife-${i}`,x:p.x+p.w/2-14,y:Math.max(150,p.y-112-i*18),w:28,h:28,direction:'down'});
+    for(const [i,point] of [gapA,gapB].entries())state.spikes.push({id:`${act.prefix}-circus-knife-${i}`,x:point.x-14,y:point.y-i*12,w:28,h:28,direction:'down'});
   }else if(chapter===3){
-    const p=act.platforms[2];state.spikes.push({id:`${act.prefix}-orbit-blade`,x:p.x,y:p.y-70,w:30,h:30,direction:'down',orbit:{centerX:p.x+p.w/2,centerY:p.y-52,radiusX:62+(variant%3)*18,radiusY:34,speed:variant%2?-1.65:1.55,phase:variant*.43}});
-    const p0=act.platforms[0];state.spikes.push({id:`${act.prefix}-mirror-needle`,x:p0.x+p0.w/2-15,y:p0.y-78,w:30,h:30,direction:'down',moving:{axis:'x',distance:72+(variant%2)*20,speed:1.8}});
+    state.spikes.push({id:`${act.prefix}-orbit-blade`,x:gapB.x-15,y:gapB.y,w:30,h:30,direction:'down',orbit:{centerX:gapB.x,centerY:gapB.y+15,radiusX:52+(variant%3)*14,radiusY:30,speed:variant%2?-1.65:1.55,phase:variant*.43}});
+    state.spikes.push({id:`${act.prefix}-mirror-needle`,x:gapA.x-15,y:gapA.y,w:30,h:30,direction:'down',moving:{axis:'x',distance:58+(variant%2)*16,speed:1.8}});
   }else{
-    const p=act.platforms[1];state.spikes.push({id:`${act.prefix}-castle-hanger`,x:p.x+p.w/2-15,y:Math.max(145,p.y-120),w:30,h:30,direction:'down'});
+    state.spikes.push({id:`${act.prefix}-castle-hanger`,x:gapB.x-15,y:gapB.y,w:30,h:30,direction:'down'});
     state.lasers.push({id:`${act.prefix}-low-sweep`,x:act.start+Math.round(span*.28),y:578,w:Math.round(span*.56),h:9,period:2.6,activeFor:.48,phase:1.2+variant*.19,direction:'horizontal'});
   }
 }
@@ -166,6 +166,38 @@ function addOpeningExecution(state:BuildState,index:number,chapter:number,lesson
   if(lessonStep>=2)addSpikeRow(state,`v8-${index}-opening-fence-b`,second,630,2+((index+1)%3));
   if(lessonStep>=3)addSpikeRow(state,`v8-${index}-opening-ceiling`,first+112,510-(index%2)*38,2,'down');
   if(chapter>=3&&lessonStep>=4)state.spikes.push({id:`v8-${index}-opening-sweeper`,x:535,y:560,w:32,h:32,direction:'right',moving:{axis:'y',distance:115,speed:2.15+chapter*.12}});
+}
+
+function addSignatureFeint(state:BuildState,act:ActScaffold,index:number,chapter:number,lessonStep:number):void{
+  if(lessonStep<2)return;
+  const prefix=`v15-${index}-${act.prefix.endsWith('finale')?'finale':'second'}-feint`,[p0,p1,p2]=act.platforms;
+  if(chapter===1){
+    const target=act.safeFloor,sid=`${prefix}-sugar-bite`;
+    state.spikes.push({id:sid,x:target.x+target.w-24,y:target.y-24,w:24,h:24,direction:'up',hidden:true});
+    state.traps.push({id:`${prefix}-trigger`,trigger:{x:target.x+22,y:0,w:34,h:650},action:'reveal',targets:[sid]});
+  }else if(chapter===2){
+    const left=act.safeFloor,right=p0,gapX=(left.x+left.w+right.x)/2;
+    state.spikes.push({id:`${prefix}-knife`,x:gapX-15,y:Math.min(left.y,right.y)-48,w:30,h:30,direction:'down',moving:{axis:'y',distance:76,speed:1.72+lessonStep*.08}});
+  }else if(chapter===3){
+    const left=act.safeFloor,right=p0,gapX=(left.x+left.w+right.x)/2,gapY=Math.min(left.y,right.y)-18;
+    state.spikes.push({id:`${prefix}-mirror-orbit`,x:gapX-15,y:gapY-15,w:30,h:30,direction:'down',orbit:{centerX:gapX,centerY:gapY,radiusX:38+lessonStep*3,radiusY:26,speed:lessonStep%2?-1.42:1.42,phase:index*.37}});
+  }else{
+    const left=act.safeFloor,right=p0,gapX=Math.round((left.x+left.w+right.x)/2);
+    state.lasers.push({id:`${prefix}-clock-line`,x:gapX-6,y:205,w:12,h:455,period:3.2,activeFor:.52,phase:.75+(index%3)*.28,direction:'vertical'});
+  }
+}
+
+function reserveButtonSafety(state:BuildState):void{
+  const removed=new Set<string>();
+  for(const button of state.buttons){
+    const zone=buttonSafetyZone(button);
+    for(const spike of state.spikes)if(rectsOverlap(zone,spikeSweptBounds(spike)))removed.add(spike.id);
+    state.lasers=state.lasers.filter(laser=>!rectsOverlap(zone,laser));
+    state.crushers=state.crushers.filter(crusher=>!rectsOverlap(zone,crusherSweptBounds(crusher)));
+  }
+  if(!removed.size)return;
+  state.spikes=state.spikes.filter(spike=>!removed.has(spike.id));
+  state.traps=state.traps.map(trap=>({...trap,targets:trap.targets.filter(target=>!removed.has(target))})).filter(trap=>trap.targets.length>0);
 }
 
 function addExecution(state:BuildState,act:ActScaffold,execution:ExecutionId,chapter:number,variant:number):void{
@@ -280,7 +312,7 @@ function directedRoom(room:RoomDef,index:number):RoomDef{
   state.blocks.push(floor(`v6-${index}-rest-a`,1490,128),floor(`v6-${index}-rest-b`,2200,118));
   const second=scaffold(state,`v6-${index}-second`,1640,2180,index),finale=scaffold(state,`v6-${index}-finale`,2330,2990,index+2);
   recipe.secondAct.slice(0,pressure.secondMechanics).forEach((mechanic,slot)=>applyMechanic(state,second,mechanic,slot,room.chapter));recipe.finale.slice(0,pressure.finaleMechanics).forEach((mechanic,slot)=>applyMechanic(state,finale,mechanic,slot+2,room.chapter));
-  if(pressure.dressSecond)dressAct(state,second,room.chapter,index);if(pressure.dressFinale)dressAct(state,finale,room.chapter,index+3);if(pressure.executionSecond)addExecution(state,second,execution.second,room.chapter,index);if(pressure.executionFinale)addExecution(state,finale,execution.finale,room.chapter,index+3);const recoveryA=addSkillLock(state,second,index,'A',lockScript.A),recoveryB=addSkillLock(state,finale,index,'B',lockScript.B);
+  if(pressure.dressSecond)dressAct(state,second,room.chapter,index);if(pressure.dressFinale)dressAct(state,finale,room.chapter,index+3);if(pressure.executionSecond)addExecution(state,second,execution.second,room.chapter,index);if(pressure.executionFinale)addExecution(state,finale,execution.finale,room.chapter,index+3);addSignatureFeint(state,lessonStep%2?second:finale,index,room.chapter,lessonStep);const recoveryA=addSkillLock(state,second,index,'A',lockScript.A),recoveryB=addSkillLock(state,finale,index,'B',lockScript.B);
   const branchX=recipe.branchSide==='second'?1980:2745,branchY=300+(index%3)*35;state.blocks.push(block(`v6-${index}-branch-step`,branchX-145,branchY+105,112,'oneway'),block(`v6-${index}-branch`,branchX,branchY,118,'oneway'));
   const encore=addEncore(state,index,room.chapter,pressure.encoreHazards);
   const optional:OptionalCollectible={id:`note-directed-${index+1}`,x:branchX+44,y:branchY-42,w:28,h:34,title:`导演手记 ${String(index+1).padStart(2,'0')}`,text:[...recipe.labels].join('。')+'。这不是随机事故，而是写进节目单的顺序。'};
@@ -288,6 +320,7 @@ function directedRoom(room:RoomDef,index:number):RoomDef{
   const baseSpeed=[0,130,149,168,187][room.chapter],maxSpeed=[0,224,249,274,298][room.chapter];
   const pursuit=index%6===5?{id:`v10-pursuit-${index}`,startX:-115,triggerX:260,baseSpeed,maxSpeed,width:96}:undefined;
   const focus=`${recipe.labels[0]} → ${recipe.labels[1]} → ${recipe.labels[2]}`;
+  reserveButtonSafety(state);
   return{...structuredClone(room),worldWidth:WIDTH,worldHeight:720,exit:{...room.exit,x:WIDTH-58,y:566,w:42,h:94},blocks:state.blocks,spikes:state.spikes,traps:state.traps,buttons:state.buttons,lasers:state.lasers,launchers:state.launchers,portals:[],crushers:state.crushers,spotlights:state.spotlights,windZones:state.windZones,checkpoints:[...(room.checkpoints??(room.checkpoint?[room.checkpoint]:[])),{x:1482,y:600,w:34,h:60},checkpointOn(recoveryA),checkpointOn(recoveryB)],optional:[...(room.optional??[]),optional,encore.optional],beats,landmark:recipe.landmark,remixKind:focus,lesson:{step:lessonStep+1,total:6,tier:lessonTier(lessonStep),focus},pursuit,sentries:sentriesFor(index,room.chapter,pressure.sentries),attackTheme:CHAPTER_ATTACK_THEMES[room.chapter],contract:HARD_CONTRACTS[index]};
 }
 
@@ -298,7 +331,7 @@ export function upgradePrologue(room:RoomDef):RoomDef{
 }
 
 function upgradeBoss(room:RoomDef):RoomDef{
-  const chapter=room.chapter,launchers=chapter===1?[{id:'boss-candy-launch',x:170,y:600,w:62,h:60,vx:500,vy:-680,facing:1 as const}]:[],crushers=chapter===4?[{id:'boss-core-hand',x:575,y:40,w:120,h:170,axis:'y' as const,distance:285,period:3.1,phase:.4}]:[],spotlights=chapter===2?[{id:'boss-applause-light',x:190,y:170,w:900,h:470,period:3.2,activeFor:1.05,phase:.3,warning:.5}]:[];
+  const chapter=room.chapter,launchers=chapter===1?[{id:'boss-candy-launch',x:170,y:600,w:62,h:60,vx:500,vy:-680,facing:1 as const}]:[],crushers=chapter===4?[{id:'boss-core-hand',x:660,y:40,w:120,h:170,axis:'y' as const,distance:285,period:3.1,phase:.4}]:[],spotlights=chapter===2?[{id:'boss-applause-light',x:190,y:170,w:900,h:470,period:3.2,activeFor:1.05,phase:.3,warning:.5}]:[];
   return{...structuredClone(room),launchers,portals:[],crushers,spotlights,attackTheme:CHAPTER_ATTACK_THEMES[chapter],beats:[],landmark:(['candy-press','cannon-stack','broken-mirror','memory-furnace'] as LandmarkId[])[chapter-1]};
 }
 

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-08-11",
+  "updatedAt": "2026-08-12",
   "project": {
     "name": "失忆乐园",
     "edition": "递进闯关版",
-    "version": "12.6.0",
+    "version": "12.7.0",
     "language": "zh-CN",
     "repository": "https://github.com/liuzhanrui30-boop/lost-memory-park",
     "playUrl": "https://liuzhanrui30-boop.github.io/lost-memory-park/"
@@ -65,13 +65,15 @@
     "stageHeat"
   ],
   "quality": {
-    "unitTestFiles": 27,
-    "unitTests": 98,
+    "unitTestFiles": 28,
+    "unitTests": 103,
     "browserSuites": 3,
     "targetFps": 60,
     "desktopInternalMinimum": "1600x900",
     "desktopInternalMaximum": "1920x1080",
-    "mobileInternal": "1280x720"
+    "mobileInternal": "1280x720",
+    "buttonSafetyPadding": 6,
+    "buttonHazardConflicts": 0
   },
   "commands": {
     "install": "cd source && npm ci",

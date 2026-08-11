@@ -38,6 +38,7 @@ for (let room = 0; room < 30; room += 1) {
       segments: snapshot.segments,
       sentries: snapshot.devices.sentries,
       pursuit: snapshot.devices.pursuit,
+      buttonConflicts: snapshot.safety.buttonConflicts,
       requirements: snapshot.execution.switches.map(lock => lock.requires),
     });
   }
@@ -48,6 +49,13 @@ await evaluate('window.__lostMemoryParkDebug.startRoom(5); window.__lostMemoryPa
 await sleep(120);
 const image = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false, fromSurface: true });
 fs.writeFileSync(path.join(artifacts, 'progression.png'), Buffer.from(image.data, 'base64'));
+await evaluate('window.__lostMemoryParkDebug.startRoom(24); window.__lostMemoryParkDebug.teleport(940,185); window.__lostMemoryParkDebug.overlay(false)');
+await sleep(160);
+const buttonImage = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false, fromSurface: true });
+fs.writeFileSync(path.join(artifacts, 'button-safety.png'), Buffer.from(buttonImage.data, 'base64'));
+await evaluate('window.__lostMemoryParkDebug.teleport(1024,196)');
+await sleep(120);
+const buttonProbe = await evaluate('window.__lostMemoryParkDebug.snapshot()');
 
 const chapters = [1, 2, 3, 4].map(chapter => authored.filter(room => room.chapter === chapter));
 const runtimeErrors = errors.filter(error => !String(error.entry?.url ?? '').endsWith('/favicon.ico'));
@@ -64,12 +72,13 @@ const report = {
     requirements: [...new Set(authored.flatMap(room => room.requirements))],
     pursuits: authored.filter(room => room.pursuit).length,
   },
+  buttonProbe: { room: buttonProbe.id, pressed: buttonProbe.safety.buttons.find(button => button.id === 'button-0')?.pressed, conflicts: buttonProbe.safety.buttonConflicts },
   errors: runtimeErrors,
 };
 
 assertAll([
   { label: '页面标题不是递进闯关版', ok: ui.title === '失忆乐园 · 递进闯关版' },
-  { label: '页面版本不是 v12.6', ok: ui.version?.includes('v12.6') },
+  { label: '页面版本不是 v12.7', ok: ui.version?.includes('v12.7') },
   { label: '本关进度 HUD 缺失', ok: ui.progress === '本关进度' },
   { label: '本关阶段 HUD 缺失', ok: ui.stage === '本关阶段' },
   { label: '舞台热度重新出现', ok: !ui.hasHeat && !settingKeys.includes('heatHud') },
@@ -80,6 +89,8 @@ assertAll([
   { label: '关内四段角色不正确', ok: authored.every(room => JSON.stringify(room.segments.roles) === JSON.stringify(['learn', 'practice', 'test', 'finish'])) },
   { label: '章节终局追逐数量不是 4', ok: authored.filter(room => room.pursuit).length === 4 },
   { label: '动作锁仍依赖 combo', ok: !authored.flatMap(room => room.requirements).includes('combo') },
+  { label: '仍有按钮与致命障碍重叠', ok: authored.every(room => room.buttonConflicts === 0) },
+  { label: '最后的笑脸黄色按钮仍无法触发', ok: buttonProbe.id === 'last-smile' && buttonProbe.safety.buttons.find(button => button.id === 'button-0')?.pressed === true && buttonProbe.safety.buttonConflicts === 0 },
   { label: '页面存在运行时错误', ok: runtimeErrors.length === 0 },
 ], report);
 client.close();

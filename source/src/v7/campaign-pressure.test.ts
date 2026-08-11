@@ -20,7 +20,7 @@ describe('v7 extreme performance campaign',()=>{
       expect(precision).toHaveLength(6);
       expect(Math.max(...precision.map(block=>block.w))).toBeLessThanOrEqual(104);
       expect(Math.min(...precision.map(block=>block.w))).toBeGreaterThanOrEqual(72);
-      expect(room.lesson?.step===1||room.spikes.some(spike=>spike.id.includes('-edge-'))).toBe(true);
+      expect(room.lesson?.step===1||room.spikes.some(spike=>/-(edge|candy-tooth|circus-knife|mirror-needle|castle-hanger)/.test(spike.id))).toBe(true);
     }
   });
 

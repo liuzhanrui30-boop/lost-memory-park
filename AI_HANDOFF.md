@@ -1,6 +1,6 @@
 # 《失忆乐园》AI 继续开发交接书
 
-> 当前基线：v12.6.0 · 递进闯关版  
+> 当前基线：v12.7.0 · 递进闯关版
 > 正式仓库：<https://github.com/liuzhanrui30-boop/lost-memory-park>  
 > 在线版本：<https://liuzhanrui30-boop.github.io/lost-memory-park/>
 
@@ -39,7 +39,7 @@ npm run build
 | 收藏 | 12 段核心记忆、员工档案、多个结局 |
 | 存档 | 浏览器 localStorage 三槽，可导入导出 JSON |
 | 网络 | 游戏运行不依赖网络、服务器或账号 |
-| 测试 | 27 个单元测试文件、98 项测试，加 3 组真实浏览器验收 |
+| 测试 | 28 个单元测试文件、103 项测试，加 3 组真实浏览器验收 |
 | 发布 | 根目录单文件 + GitHub Actions 自动部署 Pages |
 
 ### 已明确删除、不要恢复
@@ -105,6 +105,7 @@ flowchart LR
 | `source/src/v12/touch-ui.ts` | 触控显示策略和尺寸计算 |
 | `source/src/v13/echo-management.ts` | 死亡残影命中、删除和安全过滤 |
 | `source/src/v14/progression.ts` | 六关压力阶梯、段落角色、检查点层级 |
+| `source/src/v15/level-safety.ts` | 按钮安全区、动态危险扫掠和关卡可达性校验 |
 | `source/qa/` | CDP 浏览器端到端与性能验收 |
 
 ## 5. 当前关卡语法
@@ -136,6 +137,7 @@ flowchart LR
 - 重生点需要安全区，不能重生即死。
 - 摄影机采用水平死区；背景不随玩家产生明显视差晃动。
 - 失败残影没有实体碰撞。
+- 任何按钮触碰框都不得与静止、移动或轨道尖刺、激光及压台机扫掠范围重叠。
 
 修改参数前阅读 `docs/03-移动物理与碰撞.md`，并更新对应运动学测试。
 
