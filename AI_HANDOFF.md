@@ -1,6 +1,6 @@
 # 《失忆乐园》AI 继续开发交接书
 
-> 当前基线：v12.9.1 · 递进闯关版
+> 当前基线：v12.9.2 · 递进闯关版
 > 正式仓库：<https://github.com/liuzhanrui30-boop/lost-memory-park>  
 > 在线版本：<https://liuzhanrui30-boop.github.io/lost-memory-park/>
 

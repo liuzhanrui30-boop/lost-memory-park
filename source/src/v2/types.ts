@@ -17,7 +17,7 @@ export type SegmentRole='learn'|'practice'|'test'|'finish';
 export interface BeatDefinition {x:number;label:string;intensity:number;role:SegmentRole;checkpoint?:boolean}
 export interface PursuitDef {id:string;startX:number;triggerX:number;baseSpeed:number;maxSpeed:number;width?:number;color?:string}
 export type SentryPattern='aimed'|'arc'|'fan'|'mirror'|'burst';
-export interface SentryDef {id:string;x:number;y:number;range:number;period:number;projectileSpeed:number;warning:number;phase?:number;burst?:number;pattern?:SentryPattern;label?:string;shotColor?:string}
+export interface SentryDef {id:string;x:number;y:number;range:number;period:number;projectileSpeed:number;warning:number;phase?:number;burst?:number;pattern?:SentryPattern;label?:string;shotColor?:string;disableAfterPass?:boolean}
 export type ContractRule='relentless'|'no-death'|'speed';
 export interface ContractDefinition {id:string;label:string;description:string;rule:ContractRule;target?:number}
 export type LandmarkId='candy-press'|'lollipop-gears'|'gift-jaw'|'cannon-stack'|'applause-eye'|'living-curtain'|'broken-mirror'|'twin-shadow'|'rotating-room'|'clock-hand'|'memory-furnace'|'choice-engine';

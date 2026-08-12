@@ -1,5 +1,5 @@
 import { describe,expect,it } from 'vitest';
-import { aimedVelocity,contractSuccess,leadTarget,pursuitVelocity } from './hardcore-mechanics';
+import { aimedVelocity,contractSuccess,leadTarget,pursuitVelocity,sentryPassed } from './hardcore-mechanics';
 
 describe('v7 high-pressure systems',()=>{
   it('keeps pursuit threatening without making close contact mathematically hopeless',()=>{
@@ -16,6 +16,10 @@ describe('v7 high-pressure systems',()=>{
   it('leads a player who only holds forward instead of firing behind them',()=>{
     const target=leadTarget({x:900,y:200},{x:300,y:600},{x:315,y:0},400);
     expect(target.x).toBeGreaterThan(530);expect(target.y).toBe(600);
+  });
+  it('disables a tracking device only after its safe pass line',()=>{
+    expect(sentryPassed(1140,1000)).toBe(true);
+    expect(sentryPassed(1109,1000)).toBe(false);
   });
 
   it('evaluates every clear contract at the exit rather than by hidden scoring',()=>{

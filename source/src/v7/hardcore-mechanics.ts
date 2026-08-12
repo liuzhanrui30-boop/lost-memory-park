@@ -25,6 +25,9 @@ export function leadTarget(from:{x:number;y:number},player:{x:number;y:number},v
   return{x:player.x+velocity.x*travel*.9,y:player.y+velocity.y*travel*.38};
 }
 
+/** A tracking device is considered safely passed once the player clears its body and sightline. */
+export function sentryPassed(playerX:number,sentryX:number,clearance=110):boolean{return playerX>sentryX+clearance;}
+
 export function contractSuccess(contract:ContractDefinition|undefined,metrics:ContractMetrics):boolean{
   if(!contract||metrics.failed)return false;
   const target=contract.target??0;

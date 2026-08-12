@@ -61,5 +61,11 @@ describe('v12 authored four-act campaign',()=>{
     expect(room.spotlights?.some(light=>light.id.includes('spot-stutter-b'))).toBe(false);
   });
 
+  it('turns off the first tracking device after it is passed in UI room 10',()=>{
+    const room=rooms[9];
+    expect(room.id).toBe('applause-up');
+    expect(room.sentries?.[0]?.disableAfterPass).toBe(true);
+  });
+
   it('passes extended data validation',()=>expect(validateRooms()).toEqual([]));
 });

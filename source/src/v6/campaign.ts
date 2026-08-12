@@ -306,12 +306,12 @@ function applyRoomTuning(state:BuildState,recipe:RoomRecipe):void{
   }
 }
 
-function sentriesFor(index:number,chapter:number,count:0|1|2):SentryDef[]{
+function sentriesFor(index:number,chapter:number,count:0|1|2,disableAfterPass=false):SentryDef[]{
   const key=clamp(chapter,1,4) as 1|2|3|4;
   const patterns={1:['arc','aimed'],2:['fan','burst'],3:['mirror','aimed'],4:['burst','fan']} as const,labels={1:['糖豆抛射','糖针点射'],2:['飞刀扇射','马戏连炮'],3:['镜像双发','倒影狙击'],4:['齿轮连射','王冠散射']} as const,colors={1:['#d65365','#a93f55'],2:['#dca83f','#cf5b55'],3:['#45a99e','#b44763'],4:['#c64150','#df9f39']} as const;
   const periods={1:[2.72,2.48],2:[2.48,2.28],3:[2.34,2.16],4:[2.18,2.02]} as const,warnings={1:[.88,.76],2:[.78,.72],3:[.74,.68],4:[.7,.64]} as const;
   return[
-    {id:`v10-sentry-${index}-a`,x:1080+(index%3)*62,y:175+(index%3)*70,range:760,period:periods[key][0],projectileSpeed:290+chapter*25,warning:warnings[key][0],phase:(index%4)*.31,pattern:patterns[key][0],label:labels[key][0],shotColor:colors[key][0]},
+    {id:`v10-sentry-${index}-a`,x:1080+(index%3)*62,y:175+(index%3)*70,range:760,period:periods[key][0],projectileSpeed:290+chapter*25,warning:warnings[key][0],phase:(index%4)*.31,pattern:patterns[key][0],label:labels[key][0],shotColor:colors[key][0],disableAfterPass},
     {id:`v10-sentry-${index}-b`,x:2460+(index%2)*105,y:165+(index%3)*82,range:790,period:periods[key][1],projectileSpeed:310+chapter*28,warning:warnings[key][1],phase:.95+(index%3)*.27,pattern:patterns[key][1],label:labels[key][1],shotColor:colors[key][1]},
   ].slice(0,count);
 }
@@ -362,7 +362,7 @@ function directedRoom(room:RoomDef,index:number):RoomDef{
   applyRoomTuning(state,recipe);
   reserveButtonSafety(state);
   reserveObstacleSafety(state);
-  return{...structuredClone(room),worldWidth:WIDTH,worldHeight:720,exit:{...room.exit,x:WIDTH-58,y:566,w:42,h:94},blocks:state.blocks,spikes:state.spikes,traps:state.traps,buttons:state.buttons,lasers:state.lasers,launchers:state.launchers,portals:[],crushers:state.crushers,spotlights:state.spotlights,windZones:state.windZones,checkpoints:[...(room.checkpoints??(room.checkpoint?[room.checkpoint]:[])),{x:1482,y:600,w:34,h:60},checkpointOn(recoveryA),checkpointOn(recoveryB)],optional:[...(room.optional??[]),optional,encore.optional],beats,landmark:recipe.landmark,remixKind:focus,lesson:{step:lessonStep+1,total:6,tier:lessonTier(lessonStep),focus},story:roomStory(room.chapter,lessonStep),pursuit,sentries:sentriesFor(index,room.chapter,pressure.sentries),attackTheme:CHAPTER_ATTACK_THEMES[room.chapter],contract:HARD_CONTRACTS[index]};
+  return{...structuredClone(room),worldWidth:WIDTH,worldHeight:720,exit:{...room.exit,x:WIDTH-58,y:566,w:42,h:94},blocks:state.blocks,spikes:state.spikes,traps:state.traps,buttons:state.buttons,lasers:state.lasers,launchers:state.launchers,portals:[],crushers:state.crushers,spotlights:state.spotlights,windZones:state.windZones,checkpoints:[...(room.checkpoints??(room.checkpoint?[room.checkpoint]:[])),{x:1482,y:600,w:34,h:60},checkpointOn(recoveryA),checkpointOn(recoveryB)],optional:[...(room.optional??[]),optional,encore.optional],beats,landmark:recipe.landmark,remixKind:focus,lesson:{step:lessonStep+1,total:6,tier:lessonTier(lessonStep),focus},story:roomStory(room.chapter,lessonStep),pursuit,sentries:sentriesFor(index,room.chapter,pressure.sentries,index===7),attackTheme:CHAPTER_ATTACK_THEMES[room.chapter],contract:HARD_CONTRACTS[index]};
 }
 
 export function upgradePrologue(room:RoomDef):RoomDef{

@@ -1,6 +1,6 @@
 {
   "name": "lost-memory-park",
-  "version": "12.9.1",
+  "version": "12.9.2",
   "description": "《失忆乐园》原创非像素递进式纯跑跳、流畅碰撞热路径与障碍安全校验双端网页游戏",
   "scripts": {
     "dev": "vite",
