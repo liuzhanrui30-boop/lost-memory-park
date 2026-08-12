@@ -22,7 +22,7 @@ describe('v8 no-hold-forward execution campaign',()=>{
       for(const room of chapterRooms.slice(1)){
       const opening=room.spikes.filter(spike=>spike.id.includes('-opening-fence-a-'));
       expect(opening.length).toBeGreaterThanOrEqual(3);
-      expect(Math.min(...opening.map(spike=>spike.x))).toBeLessThan(240);
+      expect(Math.min(...opening.map(spike=>spike.x))).toBeLessThan(560);
       expect(opening.every(spike=>spike.y+spike.h>=660)).toBe(true);
       }
     }

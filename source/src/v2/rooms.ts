@@ -1,7 +1,7 @@
 import type { BlockDef, RoomDef, SpikeDef } from './types';
 import { directedCampaign } from '../v6/campaign';
 import { crusherSafeWindow } from '../v6/stage-mechanics';
-import { buttonHazardConflicts } from '../v15/level-safety';
+import { buttonHazardConflicts, spikeObstacleConflicts } from '../v15/level-safety';
 
 const ground = (id: string, x: number, w: number, color = '#f2a7bd'): BlockDef => ({ id, x, y: 660, w, h: 60, color });
 const block = (id: string, x: number, y: number, w: number, h = 28, color = '#f2a7bd'): BlockDef => ({ id, x, y, w, h, color });
@@ -178,6 +178,7 @@ export function validateRooms(data:RoomDef[]=rooms):string[]{
     for(const trap of room.traps)for(const target of trap.targets)if(!spikeIds.has(target))errors.push(`${room.id}: 陷阱目标不存在 ${target}`);
     for(const button of room.buttons??[]){if(button.target==='boss')continue;if(button.target.startsWith('group:')){if(!groups.has(button.target.slice(6)))errors.push(`${room.id}: 按钮分组不存在 ${button.target}`);}else if(!blockIds.has(button.target))errors.push(`${room.id}: 按钮目标不存在 ${button.target}`);}
     for(const conflict of buttonHazardConflicts(room))errors.push(`${room.id}: 按钮 ${conflict.buttonId} 与${conflict.kind} ${conflict.hazardId} 重叠`);
+    for(const conflict of spikeObstacleConflicts(room))errors.push(`${room.id}: 尖刺 ${conflict.spikeId} 与平台 ${conflict.blockId} 重叠`);
     for(const portal of room.portals??[])if(!portalIds.has(portal.target))errors.push(`${room.id}: 传送门目标不存在 ${portal.target}`);
     for(const crusher of room.crushers??[]){if(crusher.period<=0||crusherSafeWindow(crusher)<.55)errors.push(`${room.id}: 压台机安全窗口不足 ${crusher.id}`);}
     for(const sentry of room.sentries??[]){if(entityIds.has(sentry.id))errors.push(`${room.id}: 重复实体 ID ${sentry.id}`);entityIds.add(sentry.id);if(sentry.x<0||sentry.x>worldWidth||sentry.y<0||sentry.y>worldHeight||sentry.range<=0||sentry.period<1.1||sentry.projectileSpeed<=0||sentry.warning<.35)errors.push(`${room.id}: 导演哨兵参数非法 ${sentry.id}`);}

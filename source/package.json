@@ -1,7 +1,7 @@
 {
   "name": "lost-memory-park",
-  "version": "12.7.0",
-  "description": "《失忆乐园》原创非像素递进式纯跑跳、按钮安全区与章节逻辑陷阱双端网页游戏",
+  "version": "12.8.0",
+  "description": "《失忆乐园》原创非像素递进式纯跑跳、流畅碰撞热路径与障碍安全校验双端网页游戏",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build && node scripts/make-standalone.mjs",

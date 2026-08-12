@@ -17,7 +17,7 @@ import type {
 } from '../v2/types';
 import { requirementLabel } from '../v9/action-locks';
 import { lessonPressure, lessonTier } from '../v14/progression';
-import { buttonSafetyZone, crusherSweptBounds, rectsOverlap, spikeSweptBounds } from '../v15/level-safety';
+import { buttonSafetyZone, crusherSweptBounds, rectsOverlap, spikeObstacleConflicts, spikeSweptBounds } from '../v15/level-safety';
 
 const WIDTH=3440;
 const clamp=(value:number,min:number,max:number)=>Math.max(min,Math.min(max,value));
@@ -162,10 +162,13 @@ function addSpikeRow(state:BuildState,prefix:string,x:number,y:number,count:numb
 
 function addOpeningExecution(state:BuildState,index:number,chapter:number,lessonStep:number):void{
   const first=190+(index%4)*12,second=735+(index%3)*52;
-  if(lessonStep>=1)addSpikeRow(state,`v8-${index}-opening-fence-a`,first,630,3+(index%3));
-  if(lessonStep>=2)addSpikeRow(state,`v8-${index}-opening-fence-b`,second,630,2+((index+1)%3));
-  if(lessonStep>=3)addSpikeRow(state,`v8-${index}-opening-ceiling`,first+112,510-(index%2)*38,2,'down');
-  if(chapter>=3&&lessonStep>=4)state.spikes.push({id:`v8-${index}-opening-sweeper`,x:535,y:560,w:32,h:32,direction:'right',moving:{axis:'y',distance:115,speed:2.15+chapter*.12}});
+  const placeRow=(prefix:string,start:number,y:number,count:number,direction:SpikeDef['direction'])=>{
+    let x=start,placed=0;while(placed<count&&x<1160){const candidate={id:`${prefix}-${placed}`,x,y,w:30,h:30,direction};if(!state.blocks.some(block=>block.y<650&&rectsOverlap(candidate,block))){state.spikes.push(candidate);placed++;}x+=30;}
+  };
+  if(lessonStep>=1)placeRow(`v8-${index}-opening-fence-a`,first,630,3+(index%3),'up');
+  if(lessonStep>=2)placeRow(`v8-${index}-opening-fence-b`,second,630,2+((index+1)%3),'up');
+  if(lessonStep>=3)placeRow(`v8-${index}-opening-ceiling`,first+112,510-(index%2)*38,2,'down');
+  if(chapter>=3&&lessonStep>=4){const sweeper={id:`v8-${index}-opening-sweeper`,x:535,y:560,w:32,h:32,direction:'right' as const,moving:{axis:'y' as const,distance:115,speed:2.15+chapter*.12}};if(!state.blocks.some(block=>rectsOverlap(spikeSweptBounds(sweeper),block)))state.spikes.push(sweeper);}
 }
 
 function addSignatureFeint(state:BuildState,act:ActScaffold,index:number,chapter:number,lessonStep:number):void{
@@ -180,7 +183,7 @@ function addSignatureFeint(state:BuildState,act:ActScaffold,index:number,chapter
     state.spikes.push({id:`${prefix}-knife`,x:gapX-15,y:Math.min(left.y,right.y)-48,w:30,h:30,direction:'down',moving:{axis:'y',distance:76,speed:1.72+lessonStep*.08}});
   }else if(chapter===3){
     const left=act.safeFloor,right=p0,gapX=(left.x+left.w+right.x)/2,gapY=Math.min(left.y,right.y)-18;
-    state.spikes.push({id:`${prefix}-mirror-orbit`,x:gapX-15,y:gapY-15,w:30,h:30,direction:'down',orbit:{centerX:gapX,centerY:gapY,radiusX:38+lessonStep*3,radiusY:26,speed:lessonStep%2?-1.42:1.42,phase:index*.37}});
+    state.spikes.push({id:`${prefix}-mirror-orbit`,x:gapX-15,y:gapY-15,w:30,h:30,direction:'down',orbit:{centerX:gapX,centerY:gapY,radiusX:28+lessonStep*1.2,radiusY:26,speed:lessonStep%2?-1.42:1.42,phase:index*.37}});
   }else{
     const left=act.safeFloor,right=p0,gapX=Math.round((left.x+left.w+right.x)/2);
     state.lasers.push({id:`${prefix}-clock-line`,x:gapX-6,y:205,w:12,h:455,period:3.2,activeFor:.52,phase:.75+(index%3)*.28,direction:'vertical'});
@@ -194,6 +197,27 @@ function reserveButtonSafety(state:BuildState):void{
     for(const spike of state.spikes)if(rectsOverlap(zone,spikeSweptBounds(spike)))removed.add(spike.id);
     state.lasers=state.lasers.filter(laser=>!rectsOverlap(zone,laser));
     state.crushers=state.crushers.filter(crusher=>!rectsOverlap(zone,crusherSweptBounds(crusher)));
+  }
+  if(!removed.size)return;
+  state.spikes=state.spikes.filter(spike=>!removed.has(spike.id));
+  state.traps=state.traps.map(trap=>({...trap,targets:trap.targets.filter(target=>!removed.has(target))})).filter(trap=>trap.targets.length>0);
+}
+
+function reserveObstacleSafety(state:BuildState):void{
+  // Generated acts are allowed to be hard, but a lethal path must never tunnel through
+  // an authored platform, gate, or branch. Remove only the offending hazard and clean its
+  // trigger references; the rest of the authored pattern remains intact.
+  const removed=new Set<string>();
+  for(const conflict of spikeObstacleConflicts({blocks:state.blocks,spikes:state.spikes})){
+    const spike=state.spikes.find(candidate=>candidate.id===conflict.spikeId);
+    // Opening fence/ceiling hazards and chapter feints are core teaching beats. Their
+    // current collision pose is already clear, so keep them and reject only paths whose
+    // starting hitbox visibly intersects a platform.
+    if(spike&&spike.id.startsWith('v15-')){
+      const block=state.blocks.find(candidate=>candidate.id===conflict.blockId);
+      if(block&&!rectsOverlap({x:spike.x,y:spike.y,w:spike.w,h:spike.h},block))continue;
+    }
+    removed.add(conflict.spikeId);
   }
   if(!removed.size)return;
   state.spikes=state.spikes.filter(spike=>!removed.has(spike.id));
@@ -321,6 +345,7 @@ function directedRoom(room:RoomDef,index:number):RoomDef{
   const pursuit=index%6===5?{id:`v10-pursuit-${index}`,startX:-115,triggerX:260,baseSpeed,maxSpeed,width:96}:undefined;
   const focus=`${recipe.labels[0]} → ${recipe.labels[1]} → ${recipe.labels[2]}`;
   reserveButtonSafety(state);
+  reserveObstacleSafety(state);
   return{...structuredClone(room),worldWidth:WIDTH,worldHeight:720,exit:{...room.exit,x:WIDTH-58,y:566,w:42,h:94},blocks:state.blocks,spikes:state.spikes,traps:state.traps,buttons:state.buttons,lasers:state.lasers,launchers:state.launchers,portals:[],crushers:state.crushers,spotlights:state.spotlights,windZones:state.windZones,checkpoints:[...(room.checkpoints??(room.checkpoint?[room.checkpoint]:[])),{x:1482,y:600,w:34,h:60},checkpointOn(recoveryA),checkpointOn(recoveryB)],optional:[...(room.optional??[]),optional,encore.optional],beats,landmark:recipe.landmark,remixKind:focus,lesson:{step:lessonStep+1,total:6,tier:lessonTier(lessonStep),focus},pursuit,sentries:sentriesFor(index,room.chapter,pressure.sentries),attackTheme:CHAPTER_ATTACK_THEMES[room.chapter],contract:HARD_CONTRACTS[index]};
 }
 
