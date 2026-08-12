@@ -39,6 +39,7 @@ jobs:
         run: |
           mkdir -p ../pages-dist
           cp dist/lost-memory-park.html ../pages-dist/index.html
+          cp dist/lost-memory-park.html ../pages-dist/play.html
           touch ../pages-dist/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

@@ -42,6 +42,8 @@ npm run build
 | 测试 | 29 个单元测试文件、106 项测试，加 3 组真实浏览器验收 |
 | 发布 | 根目录单文件 + GitHub Actions 自动部署 Pages |
 
+备用网页入口：`https://liuzhanrui30-boop.github.io/lost-memory-park/play.html`。它与根入口使用完全相同的构建文件，用于绕过浏览器缓存或根路径缓存异常。
+
 ### 已明确删除、不要恢复
 
 - 冲刺；

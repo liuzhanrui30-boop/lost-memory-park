@@ -11,6 +11,8 @@
 
 **永久公开地址：** <https://liuzhanrui30-boop.github.io/lost-memory-park/>
 
+**备用入口：** <https://liuzhanrui30-boop.github.io/lost-memory-park/play.html>
+
 ![《失忆乐园》v12.6 递进闯关版首页](docs/images/title-v12.6.png)
 
 ![《失忆乐园》v12.6 第五关考核组合](docs/images/progression-v12.6.png)
