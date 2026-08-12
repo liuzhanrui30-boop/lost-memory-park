@@ -62,6 +62,8 @@ export interface OptionalCollectible extends Rect {
   text: string;
 }
 
+export interface StoryBeat { speaker:string; text:string; objective?:string; }
+
 export interface TutorialSignDef extends Rect {
   id:string;
   title:string;
@@ -129,6 +131,7 @@ export interface RoomDef {
   contract?:ContractDefinition;
   tutorialSigns?:TutorialSignDef[];
   lesson?:{step:number;total:number;tier:string;focus:string};
+  story?:StoryBeat;
 }
 
 export interface AccessibilitySettings {

@@ -4,7 +4,7 @@
   "project": {
     "name": "失忆乐园",
     "edition": "递进闯关版",
-    "version": "12.8.0",
+    "version": "12.9.0",
     "language": "zh-CN",
     "repository": "https://github.com/liuzhanrui30-boop/lost-memory-park",
     "playUrl": "https://liuzhanrui30-boop.github.io/lost-memory-park/"
@@ -65,8 +65,8 @@
     "stageHeat"
   ],
   "quality": {
-    "unitTestFiles": 28,
-    "unitTests": 104,
+    "unitTestFiles": 29,
+    "unitTests": 106,
     "browserSuites": 3,
     "targetFps": 60,
     "desktopInternalMinimum": "1600x900",

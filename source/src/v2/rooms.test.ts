@@ -23,6 +23,13 @@ describe('I Wanna style remake data',()=>{
     expect(new Set(ids).size).toBe(12);
     expect(rooms.flatMap(room=>room.optional??[]).length).toBeGreaterThanOrEqual(24);
   });
+  it('binds a readable story beat to every playable scene',()=>{
+    for(const room of rooms){
+      expect(room.story?.speaker.length).toBeGreaterThan(0);
+      expect(room.story?.text.length).toBeGreaterThan(20);
+      expect(room.story?.objective?.length).toBeGreaterThan(5);
+    }
+  });
   it('only targets spikes that exist in the room',()=>{
     for(const room of rooms){const spikeIds=new Set(room.spikes.map(s=>s.id));for(const trap of room.traps)for(const target of trap.targets)expect(spikeIds.has(target)).toBe(true);}
   });

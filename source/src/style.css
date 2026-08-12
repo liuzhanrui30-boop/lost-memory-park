@@ -410,6 +410,10 @@ button.primary { color:#fff2d5; background:linear-gradient(#bd4d59,#963342); }
   font:900 9px/1 monospace; letter-spacing:.24em; transform:rotate(-1deg);
 }
 .room-card p { max-height:3.1em; overflow:hidden; }
+.room-story { margin:7px 0 8px; padding:7px 9px; border-left:4px solid #d7a348; background:rgba(255,244,207,.58); color:#3b2931; display:grid; gap:3px; }
+.room-story.hidden { display:none; }
+.room-story b { color:#963b48; font:900 10px/1.2 monospace; letter-spacing:.08em; }
+.room-story span { font-size:12px; line-height:1.45; font-weight:700; }
 
 @media (max-width:1100px) {
   .take-chip { min-width:72px; }
@@ -438,6 +442,8 @@ button:focus-visible,select:focus-visible,input:focus-visible {
 .beat-flash::before,.beat-flash::after { width:13px; height:27px; }
 @media (max-width:700px) {
   .room-card { top:98px; width:min(285px,82vw); }
+  .room-story { margin:4px 0 5px; padding:5px 7px; }
+  .room-story span { font-size:10px; line-height:1.32; }
   .beat-flash { bottom:22%; }
   .toast { bottom:16%; }
 }

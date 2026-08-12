@@ -1,6 +1,6 @@
 # 《失忆乐园》AI 继续开发交接书
 
-> 当前基线：v12.8.0 · 递进闯关版
+> 当前基线：v12.9.0 · 递进闯关版
 > 正式仓库：<https://github.com/liuzhanrui30-boop/lost-memory-park>  
 > 在线版本：<https://liuzhanrui30-boop.github.io/lost-memory-park/>
 
@@ -39,7 +39,7 @@ npm run build
 | 收藏 | 12 段核心记忆、员工档案、多个结局 |
 | 存档 | 浏览器 localStorage 三槽，可导入导出 JSON |
 | 网络 | 游戏运行不依赖网络、服务器或账号 |
-| 测试 | 28 个单元测试文件、104 项测试，加 3 组真实浏览器验收 |
+| 测试 | 29 个单元测试文件、106 项测试，加 3 组真实浏览器验收 |
 | 发布 | 根目录单文件 + GitHub Actions 自动部署 Pages |
 
 ### 已明确删除、不要恢复
@@ -59,6 +59,12 @@ npm run build
 - `IWannaGame.moveX/moveY` 使用无分配碰撞扫描；不在固定步中创建 `filter/map/spread` 临时数组。
 - 粒子数量硬上限 70；高 DPI/手机紧凑视口在低细节模式下关闭高成本阴影滤镜。
 - `spikeObstacleConflicts()` 校验动态尖刺扫掠范围与平台、锁墙和支路的分离。
+
+## v12.9 剧情与对话
+
+- `source/src/story/narrative.ts` 是剧情唯一内容源，提供序章、四章六段推进、四位 Boss 和终章台词。
+- `RoomDef.story` 由 `v6/campaign.ts` 在生成房间时绑定，`main.ts` 只负责把说话者、线索和目标显示到房间卡/暂停页。
+- 叙事主线固定为：设计师身份 → 服从实验 → 园长执行人格 → 记忆带来的终章选择。新增台词必须保留这条因果链，并补充 `narrative.test.ts`。
 
 ## 3. 架构与状态流
 

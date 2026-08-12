@@ -58,6 +58,13 @@ await sleep(120);
 const buttonProbe = await evaluate('window.__lostMemoryParkDebug.snapshot()');
 
 const chapters = [1, 2, 3, 4].map(chapter => authored.filter(room => room.chapter === chapter));
+await evaluate('window.__lostMemoryParkDebug.startRoom(1)');
+const story = await evaluate(`({
+  visible: !document.querySelector('#room-story').classList.contains('hidden'),
+  speaker: document.querySelector('#room-story-speaker')?.textContent,
+  text: document.querySelector('#room-story-text')?.textContent,
+  objective: document.querySelector('#pause-objective')?.textContent
+})`);
 const runtimeErrors = errors.filter(error => !String(error.entry?.url ?? '').endsWith('/favicon.ico'));
 const report = {
   suite: 'progression',
@@ -73,12 +80,13 @@ const report = {
     pursuits: authored.filter(room => room.pursuit).length,
   },
   buttonProbe: { room: buttonProbe.id, pressed: buttonProbe.safety.buttons.find(button => button.id === 'button-0')?.pressed, conflicts: buttonProbe.safety.buttonConflicts },
+  story,
   errors: runtimeErrors,
 };
 
 assertAll([
   { label: '页面标题不是递进闯关版', ok: ui.title === '失忆乐园 · 递进闯关版' },
-  { label: '页面版本不是 v12.8', ok: ui.version?.includes('v12.8') },
+  { label: '页面版本不是 v12.9', ok: ui.version?.includes('v12.9') },
   { label: '本关进度 HUD 缺失', ok: ui.progress === '本关进度' },
   { label: '本关阶段 HUD 缺失', ok: ui.stage === '本关阶段' },
   { label: '舞台热度重新出现', ok: !ui.hasHeat && !settingKeys.includes('heatHud') },
@@ -91,6 +99,7 @@ assertAll([
   { label: '动作锁仍依赖 combo', ok: !authored.flatMap(room => room.requirements).includes('combo') },
   { label: '仍有按钮与致命障碍重叠', ok: authored.every(room => room.buttonConflicts === 0) },
   { label: '最后的笑脸黄色按钮仍无法触发', ok: buttonProbe.id === 'last-smile' && buttonProbe.safety.buttons.find(button => button.id === 'button-0')?.pressed === true && buttonProbe.safety.buttonConflicts === 0 },
+  { label: '房间剧情卡没有显示说话者、线索和目标', ok: story.visible && story.speaker?.length > 0 && story.text?.length > 20 && story.objective?.length > 5 },
   { label: '页面存在运行时错误', ok: runtimeErrors.length === 0 },
 ], report);
 client.close();
