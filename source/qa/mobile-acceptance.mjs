@@ -115,7 +115,7 @@ const desktop = await evaluate(`(() => {
 const runtimeErrors = errors.filter(error => !String(error.entry?.url ?? '').endsWith('/favicon.ico'));
 const report = { suite: 'mobile', title, active, multi, slide, drop: { before: dropBefore, after: dropAfter }, touchPause, portrait, desktop, errors: runtimeErrors };
 assertAll([
-  { label: '手机标题版本错误', ok: title.version?.includes('v12.9') },
+  { label: '手机标题版本错误', ok: title.version?.includes('v12.9.1') },
   { label: '手机触控能力未启用', ok: title.capable && title.enabled },
   { label: '标题页触控按钮不应显示', ok: title.controlsHidden },
   { label: '标题卡超出横屏', ok: title.card.bottom <= title.viewport[1] + 2 && title.scroll[0] <= title.viewport[0] + 2 },

@@ -86,7 +86,7 @@ const report = {
 
 assertAll([
   { label: '页面标题不是递进闯关版', ok: ui.title === '失忆乐园 · 递进闯关版' },
-  { label: '页面版本不是 v12.9', ok: ui.version?.includes('v12.9') },
+  { label: '页面版本不是 v12.9.1', ok: ui.version?.includes('v12.9.1') },
   { label: '本关进度 HUD 缺失', ok: ui.progress === '本关进度' },
   { label: '本关阶段 HUD 缺失', ok: ui.stage === '本关阶段' },
   { label: '舞台热度重新出现', ok: !ui.hasHeat && !settingKeys.includes('heatHud') },

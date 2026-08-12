@@ -82,6 +82,8 @@ export interface RoomRecipe {
   landmark:LandmarkId;
   branchSide:'second'|'finale';
   labels:readonly [string,string,string];
+  /** Optional room-specific tuning. Negative values remove optional hazards after assembly. */
+  spotlightDelta?:number;
 }
 
 export const ROOM_RECIPES:readonly RoomRecipe[]=[
@@ -95,7 +97,8 @@ export const ROOM_RECIPES:readonly RoomRecipe[]=[
   {id:'circus-applause',secondAct:['spotlight','moving'],finale:['applause','toggle'],landmark:'applause-eye',branchSide:'finale',labels:['灯灭前进','移动掌声','观众决定地板']},
   {id:'circus-curtain-teeth',secondAct:['crumble','bounce'],finale:['curtain','crusher'],landmark:'living-curtain',branchSide:'second',labels:['临时舞台','弹床谢幕','幕布开始合拢']},
   {id:'circus-return-shot',secondAct:['launcher','laser'],finale:['bounce','launcher'],landmark:'cannon-stack',branchSide:'finale',labels:['红线排练','炮火穿针','连续弹射']},
-  {id:'circus-switch-light',secondAct:['spotlight','switch'],finale:['moving','launcher'],landmark:'applause-eye',branchSide:'second',labels:['掌声静止','暗场开关','最后一次腾空']},
+  // UI room 13 (掌声计量器): remove one optional spotlight from the assembled route.
+  {id:'circus-switch-light',secondAct:['spotlight','switch'],finale:['moving','launcher'],landmark:'applause-eye',branchSide:'second',labels:['掌声静止','暗场开关','最后一次腾空'],spotlightDelta:-1},
   {id:'circus-living-curtain',secondAct:['crusher','bounce'],finale:['curtain','spotlight'],landmark:'living-curtain',branchSide:'finale',labels:['压台彩排','弹床逃生','幕布在看你']},
   {id:'mirror-phase-route',secondAct:['phase','moving'],finale:['toggle','orbit'],landmark:'broken-mirror',branchSide:'second',labels:['相位入口','倒影升降','房间开始旋转']},
   {id:'mirror-color-route',secondAct:['toggle','ice'],finale:['moving','phase'],landmark:'twin-shadow',branchSide:'finale',labels:['冰面分色','倒影换路','出口延迟出现']},
@@ -292,6 +295,17 @@ function addEncore(state:BuildState,index:number,chapter:number,hazardLevel:0|1|
   return{label,optional:{id:`note-encore-${index+1}`,x:high.x+30,y:high.y-38,w:28,h:34,title:`返场节目单 ${String(index+1).padStart(2,'0')}`,text:`${label}：位移特技已经停用。这里记录的只有助跑、起跳、空中修正和落点。`}};
 }
 
+function applyRoomTuning(state:BuildState,recipe:RoomRecipe):void{
+  const removeCount=Math.max(0,-(recipe.spotlightDelta??0));
+  for(let i=0;i<removeCount&&state.spotlights.length;i++){
+    // Keep the main lesson and encore warning, but reduce the duplicated
+    // split-beam execution to one half so the crossing stays readable.
+    const duplicateIndex=state.spotlights.findIndex(light=>light.id.includes('spot-stutter-b'));
+    const optionalIndex=state.spotlights.findIndex(light=>light.id.includes('encore-freeze-light'));
+    state.spotlights.splice(duplicateIndex>=0?duplicateIndex:(optionalIndex>=0?optionalIndex:state.spotlights.length-1),1);
+  }
+}
+
 function sentriesFor(index:number,chapter:number,count:0|1|2):SentryDef[]{
   const key=clamp(chapter,1,4) as 1|2|3|4;
   const patterns={1:['arc','aimed'],2:['fan','burst'],3:['mirror','aimed'],4:['burst','fan']} as const,labels={1:['糖豆抛射','糖针点射'],2:['飞刀扇射','马戏连炮'],3:['镜像双发','倒影狙击'],4:['齿轮连射','王冠散射']} as const,colors={1:['#d65365','#a93f55'],2:['#dca83f','#cf5b55'],3:['#45a99e','#b44763'],4:['#c64150','#df9f39']} as const;
@@ -345,6 +359,7 @@ function directedRoom(room:RoomDef,index:number):RoomDef{
   const baseSpeed=[0,130,149,168,187][room.chapter],maxSpeed=[0,224,249,274,298][room.chapter];
   const pursuit=index%6===5?{id:`v10-pursuit-${index}`,startX:-115,triggerX:260,baseSpeed,maxSpeed,width:96}:undefined;
   const focus=`${recipe.labels[0]} → ${recipe.labels[1]} → ${recipe.labels[2]}`;
+  applyRoomTuning(state,recipe);
   reserveButtonSafety(state);
   reserveObstacleSafety(state);
   return{...structuredClone(room),worldWidth:WIDTH,worldHeight:720,exit:{...room.exit,x:WIDTH-58,y:566,w:42,h:94},blocks:state.blocks,spikes:state.spikes,traps:state.traps,buttons:state.buttons,lasers:state.lasers,launchers:state.launchers,portals:[],crushers:state.crushers,spotlights:state.spotlights,windZones:state.windZones,checkpoints:[...(room.checkpoints??(room.checkpoint?[room.checkpoint]:[])),{x:1482,y:600,w:34,h:60},checkpointOn(recoveryA),checkpointOn(recoveryB)],optional:[...(room.optional??[]),optional,encore.optional],beats,landmark:recipe.landmark,remixKind:focus,lesson:{step:lessonStep+1,total:6,tier:lessonTier(lessonStep),focus},story:roomStory(room.chapter,lessonStep),pursuit,sentries:sentriesFor(index,room.chapter,pressure.sentries),attackTheme:CHAPTER_ATTACK_THEMES[room.chapter],contract:HARD_CONTRACTS[index]};

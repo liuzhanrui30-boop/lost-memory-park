@@ -54,5 +54,12 @@ describe('v12 authored four-act campaign',()=>{
     expect(prologue.beats).toHaveLength(3);
   });
 
+  it('keeps UI room 13 readable by removing one optional spotlight',()=>{
+    const room=rooms.find(candidate=>candidate.id==='applause-meter')!;
+    expect(room.id).toBe('applause-meter');
+    expect(room.spotlights?.length).toBe(3);
+    expect(room.spotlights?.some(light=>light.id.includes('spot-stutter-b'))).toBe(false);
+  });
+
   it('passes extended data validation',()=>expect(validateRooms()).toEqual([]));
 });

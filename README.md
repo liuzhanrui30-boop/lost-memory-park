@@ -1,11 +1,11 @@
-# 失忆乐园 · 递进闯关版 v12.9
+# 失忆乐园 · 递进闯关版 v12.9.1
 
 > 原创非像素、纯跑跳、高难度横版网页游戏。纸雕/黏土玩具舞台美术，融合反套路陷阱、平台跳跃、动作验证锁、远程弹幕、四阶段宽关卡和完整 Boss 战。
 
 [![Play](https://img.shields.io/badge/在线游玩-GitHub%20Pages-a83d4d)](https://liuzhanrui30-boop.github.io/lost-memory-park/)
-![Version](https://img.shields.io/badge/version-12.9.0-d5a546)
+![Version](https://img.shields.io/badge/version-12.9.1-d5a546)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)
-![Tests](https://img.shields.io/badge/tests-106%20passed-3f8378)
+![Tests](https://img.shields.io/badge/tests-107%20passed-3f8378)
 
 ## 立即游玩
 
@@ -82,7 +82,7 @@ npm run dev
 - 高 DPI 和手机低端设备自动启用轻量绘制细节，保留清晰轮廓与可读预警。
 - 新增尖刺扫掠路径与平台/锁墙/支路的系统校验；动态尖刺不会穿过实体障碍。
 
-## v12.9 剧情清晰化
+## v12.9.1 聚光灯调优与入口稳定化
 
 - 每个序章、普通房间、Boss 和终章都拥有明确的故事节点：说话者、关键线索和当前目标。
 - 四章剧情按“我是设计师 → 乐园是服从实验 → 园长是执行人格 → 记忆决定醒来方式”递进，不再只依赖零散档案句子。
@@ -104,7 +104,7 @@ npm run dev
 | Boss | 4 位，每位 3 阶段；必须躲满规定攻击波才能解锁机关 |
 | 模式 | 故事、计时挑战、Boss Rush、镜像、导演失控 |
 | 存档 | 3 个本地槽位，可导入/导出 JSON |
-| 自动测试 | 29 个测试文件，106 项测试 |
+| 自动测试 | 29 个测试文件，107 项测试 |
 | 浏览器验收 | 递进结构、手机触控、性能 3 组真实 Chrome 验收 |
 | 按钮安全 | 所有静止、移动和轨道尖刺的扫掠范围都不得进入按钮触碰区 |
 
